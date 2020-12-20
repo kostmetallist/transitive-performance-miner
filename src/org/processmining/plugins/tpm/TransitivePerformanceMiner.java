@@ -1,4 +1,4 @@
-package org.processmining.plugins.transitiveminer;
+package org.processmining.plugins.tpm;
 
 import org.processmining.framework.plugin.annotations.*;
 import org.processmining.framework.plugin.*;
@@ -6,11 +6,11 @@ import org.processmining.contexts.uitopia.*;
 import org.processmining.contexts.uitopia.annotations.*;
 
 
-@Plugin(name = "TransitiveMiner",
+@Plugin(name = "TransitivePerformanceMiner",
     parameterLabels = { "First", "Second", "Third" },
     returnLabels = { "Child" },
     returnTypes = { Person.class })
-public class TransitiveMiner {
+public class TransitivePerformanceMiner {
     @UITopiaVariant(affiliation = "CMC MSU",
         author = "Default",
         email = "default@example.com",

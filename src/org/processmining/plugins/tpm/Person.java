@@ -1,4 +1,4 @@
-package org.processmining.plugins.transitiveminer;
+package org.processmining.plugins.tpm;
 
 
 public class Person {
@@ -13,7 +13,7 @@ public class Person {
         return name;
     }
 
-    public void setName(Name name) {
+    void setName(Name name) {
         this.name = name;
     }
 
@@ -21,7 +21,7 @@ public class Person {
         return age;
     }
 
-    public void setAge(int age) {
+    void setAge(int age) {
         this.age = age;
     }
 }

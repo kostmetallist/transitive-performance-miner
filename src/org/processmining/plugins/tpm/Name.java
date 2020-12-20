@@ -1,4 +1,4 @@
-package org.processmining.plugins.transitiveminer;
+package org.processmining.plugins.tpm;
 
 
 class Name {

@@ -1,4 +1,4 @@
-package org.processmining.plugins.transitiveminer;
+package org.processmining.plugins.tpm;
 
 
 public class ProcreationConfiguration {
@@ -12,7 +12,7 @@ public class ProcreationConfiguration {
         return name;
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         this.name = name;
     }
 }
