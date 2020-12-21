@@ -1,6 +1,6 @@
 <?eclipse.ant.import ?>
 
-<project name="transitive-performance-miner" default="Compile Sources" basedir=".">
+<project name="transitive-performance-miner" default="compileSources" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
     <!-- set global properties for this build -->
     <property environment="env"/>
     <property name="src" location="src"/>
@@ -146,16 +146,19 @@
             </copy>
             <exec executable="grep">
                 <redirector output="ivypack.xml"/>
-                <arg value="<dependency .*org="prom" "/>
+            	<!-- Originally, the following line was <arg value="<dependency .*org="prom" "/> -->
+                <arg value="dependency .*org='prom' "/>
                 <arg value="ivy.xml"/>
             </exec>
             <echo file="${release}/packages.xml">
-            <packages> <package name="${project}" version="${version}" os="${os}" url="http://www.promtools.org/prom6/packages/${project}/${project}-${version}-${os}.zip" desc="${description}" org="${organization}" license="${license}" author="${author}" auto="false" hasPlugins="true" logo="${logo}">
+                <packages>
+                	<package name="${project}" version="${version}" os="${os}" url="http://www.promtools.org/prom6/packages/${project}/${project}-${version}-${os}.zip" desc="${description}" org="${organization}" license="${license}" author="${author}" auto="false" hasPlugins="true" logo="${logo}"/>
+                </packages>
             </echo>
             <concat destfile="${release}/packages.xml" append="true">
                 <filelist files="ivypack.xml"/>
             </concat>
-            <echo file="${release}/packages.xml" append="true"> </package> </packages> </echo>
+            <echo file="${release}/packages.xml" append="true"></echo>
             <copy file="ivy.xml" tofile="${release}/ivy.xml" overwrite="true"/>
             <replace file="${release}/ivy.xml" token="VERSION" value="${version}"/>
         </sequential>
@@ -183,10 +186,10 @@
     <!--
      create the project's javadoc from all existing sources. Note that only org.processmining.** is included 
     -->
-    <target name="Create Javadoc" description="Generated javadoc" depends="javadoc"/>
+    <target name="createJavadoc" description="Generated javadoc" depends="javadoc"/>
+    	
+    <target name="compileSources" depends="resolve,compile,makejar"/>
 
     <!-- export distribution archive -->
-    <target name="Create downloadable archive" depends="Compile Sources,archive"/>
-
-    <target name="Compile Sources" depends="resolve,compile,makejar"/>
+    <target name="createDistArchive" depends="compileSources,archive"/>
 </project>
