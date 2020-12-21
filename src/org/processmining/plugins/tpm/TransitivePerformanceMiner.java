@@ -11,7 +11,7 @@ import org.processmining.contexts.uitopia.annotations.*;
     returnLabels = { "Child" },
     returnTypes = { Person.class })
 public class TransitivePerformanceMiner {
-    @UITopiaVariant(affiliation = "CMC MSU",
+    @UITopiaVariant(affiliation = "ISPRAS",
         author = "Default",
         email = "default@example.com",
         uiLabel = UITopiaVariant.USEPLUGIN)
@@ -26,7 +26,7 @@ public class TransitivePerformanceMiner {
         return child;
     }
 
-    @UITopiaVariant(affiliation = "CMC MSU",
+    @UITopiaVariant(affiliation = "ISPRAS",
         author = "Default",
         email = "default@example.com",
         uiLabel = UITopiaVariant.USEPLUGIN)

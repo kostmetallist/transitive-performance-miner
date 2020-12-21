@@ -1,4 +1,6 @@
-<project name="GettingStarted" default="Compile Sources" basedir=".">
+<?eclipse.ant.import ?>
+
+<project name="transitive-performance-miner" default="Compile Sources" basedir=".">
     <!-- set global properties for this build -->
     <property environment="env"/>
     <property name="src" location="src"/>
@@ -8,10 +10,10 @@
     <property name="dist" location="dist"/>
     <property name="release" location="latestrelease"/>
     <property name="version" value="${major_minor}.${env.BUILD_NUMBER}"/>
-    <property name="project" value="GettingStarted"/>
-    <property name="author" value="H.M.W. Verbeek"/>
-    <property name="organization" value="Eindhoven University of Technology"/>
-    <property name="description" value="Getting Started"/>
+    <property name="project" value="TransitivePerformanceMiner"/>
+    <property name="author" value="K.V. Kukushkin"/>
+    <property name="organization" value="ISPRAS"/>
+    <property name="description" value="No description"/>
     <property name="license" value="L-GPL"/>
     <property name="logo" value="http://www.promtools.org/prom6/packages/prom_subtitle_hat_300.png"/>
     <property name="ivy.lib.dir" value="ivy"/>
@@ -92,13 +94,9 @@
     </target>
 
     <target name="resolve">
-        <ivy:retrieve type="jar,bundle" sync="true"/>
-        <!--
-         Uncomment next line if libraries need to be copied from ivy to lib folder. 
-        -->
-        <!--
-        ivy:retrieve pattern="lib/[artifact]-[revision].[ext]" conf="lib" type="jar,bundle" sync="true" /
-        -->
+    	<ivy:retrieve type="jar,bundle" sync="true"/>
+        <!-- Uncomment next line if libraries need to be copied from ivy to lib folder. -->
+        <ivy:retrieve pattern="lib/[artifact]-[revision].[ext]" conf="lib" type="jar,bundle" sync="true"/>
     </target>
 
     <target name="javadoc">
