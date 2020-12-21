@@ -17,7 +17,6 @@
     <property name="license" value="L-GPL"/>
     <property name="logo" value="http://www.promtools.org/prom6/packages/prom_subtitle_hat_300.png"/>
     <property name="ivy.lib.dir" value="ivy"/>
-    <property name="ivy.cache.dir" value="/var/lib/hudson/.ivy2/cache/${env.EXECUTOR_NUMBER}"/>
     <!--
      Set the os to win32, win64, lin32, lin64, mac, or all 
     -->
@@ -41,7 +40,7 @@
             <!--
              Compile the java code from ${src}-@{module} into ${build} 
             -->
-            <javac srcdir="${src}" classpathref="classpath" destdir="${build}" nowarn="false" verbose="no" debug="true" debuglevel="lines,vars,source" deprecation="yes" source="${bytecode_format}" target="${bytecode_format}">
+            <javac srcdir="${src}" classpathref="classpath" destdir="${build}" nowarn="false" verbose="no" debug="true" debuglevel="lines,vars,source" deprecation="yes">
                 <!-- Check for unsafe operations -->
                 <compilerarg value="-Xlint:unchecked"/>
             </javac>
