@@ -22,7 +22,7 @@ public class TransitivePerformanceMiner {
 
         Person child = new Person();
         child.setAge(0);
-        child.setName(new Name(config.getName(), father.getLast()));
+        child.setName(new Name(config.getName(), father.getName().getLast()));
         return child;
     }
 
@@ -34,8 +34,7 @@ public class TransitivePerformanceMiner {
     public static Person procreate(final UIPluginContext context,
         final Person father, final Person mother) {
 
-        ProcreationConfiguration config = new ProcreationConfiguration();
-        populate(context, config);
+        ProcreationConfiguration config = new ProcreationConfiguration("Some configuration");
         return procreate(context, father, mother, config);
     }
 }
