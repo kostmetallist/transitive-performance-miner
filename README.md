@@ -17,7 +17,7 @@ and adjust the environment:
 
 Although IvyDE should be enough for retrieving all the required packages, it came out
 that a manual Ant + Ivy JAR installation was needed in order to build the project. For more
-information, check out [link](https://stackoverflow.com/questions/12677816/ant-target-failing-antlib-or-ivy-issue).  
+information, check out [link](https://stackoverflow.com/questions/12677816/ant-target-failing-antlib-or-ivy-issue).
 
 ## Compilation and build
 
