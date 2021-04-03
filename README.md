@@ -1,11 +1,21 @@
 # Transitive Performance Miner
 
-A tool for deriving software performance knowledge by event log analysis. Implementation is
-going to be a ProM Framework plug-in.
+A tool for deriving software performance knowledge by event log analysis.
+Implementation is in form of
+[ProM 6](https://www.promtools.org/doku.php?id=gettingstarted:start) Framework
+plug-in.
+
+## Functionality
+
+<p align="center">
+  <img src="doc/showcase-diagram.png" alt="<icon here>" width="50%"/>
+</p>
+
+`TODO` description.
 
 ## Prerequisites
 
-ProM plug-in development requires custom third-party jars usage, and the recommended way
+ProM plug-in development requires custom third-party JARs usage, and the recommended way
 to contribute is to setup an Eclipse environment. Necessary dependencies are meant to be
 managed via Ivy. Preferred option is to install an IvyDE Eclipse addon and manipulate the
 dependencies by XML configs. Please refer to the following sources as how to configure Ivy
@@ -28,7 +38,18 @@ compilation and JAR generation. Therefore, executing
 ant
 ```
 
-is enough to build. 
+is enough to build.
+
+## ProM Integration
+
+By default, ProM 6.10 uses Java 8, so make sure you compile plugin sources with
+the corresponding Java version. To launch the framework with custom plugin
+included, run Eclipse launch config XML
+`ProM with UITopia (TransitivePerformanceMiner).launch`.
+
+This will lead to plugin dependencies resolving (with local caching) and then
+the framework will show up. Plugin should be available among the standard ones
+in the "Actions" section.
 
 ## Troubleshooting
 

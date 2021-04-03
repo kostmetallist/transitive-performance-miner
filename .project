@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
 	<name>transitive-performance-miner</name>
-	<comment></comment>
+	<comment>A tool for deriving software performance info by event log</comment>
 	<projects>
 	</projects>
 	<buildSpec>
