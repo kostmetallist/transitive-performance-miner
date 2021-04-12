@@ -4,6 +4,7 @@ import org.processmining.contexts.uitopia.*;
 import org.processmining.contexts.uitopia.annotations.*;
 import org.processmining.framework.plugin.*;
 import org.processmining.framework.plugin.annotations.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
