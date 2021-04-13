@@ -55,6 +55,16 @@ This will lead to plugin dependencies resolving (with local caching) and then
 the framework will show up. Plugin should be available among the standard ones
 in the "Actions" section.
 
+## Standard ProM plugins examples
+
+Existing analytical solutions were taken for insights to implement this one.
+They are available at public ProM packages
+[repository](https://svn.win.tue.nl/trac/prom/browser/Packages?order=name).
+
+For developer convenience, they can be checked out with
+
+`svn checkout http://svn.win.tue.nl/repos/prom/Packages/<NAME>/Trunk`
+
 ## Troubleshooting
 
 For any questions, suggestions, or bug reporting please refer to the
