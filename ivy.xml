@@ -12,6 +12,7 @@
     <dependency org="prom" name="ProM-Plugins" rev="latest" changing="true" transitive="true"/>
     <!-- ProM packages. -->
     <dependency org="prom" name="BasicUtils" rev="latest" changing="true" transitive="true" />
+    <dependency org="prom" name="GraphViz" rev="latest" changing="true" transitive="true" />
 
     <!-- Third party libraries. These may span multiple lines. -->
     <!--
