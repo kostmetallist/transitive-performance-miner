@@ -1,6 +1,5 @@
 package org.processmining.plugins.tpm;
 
-
 public class WeightCharacteristic {
 
 	private double averageThroughputTime;

@@ -2,7 +2,6 @@ package org.processmining.plugins.tpm;
 
 import java.util.Set;
 
-
 public class MarkedClusterNet {
 
 	private Set<EventCluster> clusters;

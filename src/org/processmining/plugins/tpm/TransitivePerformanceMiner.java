@@ -8,7 +8,6 @@ import org.processmining.framework.plugin.annotations.*;
 import java.util.HashSet;
 import java.util.Set;
 
-
 @Plugin(name = "TransitivePerformanceMiner",
     parameterLabels = { "Clusters", "Transitions" },
     returnLabels = { "ReturnLabel" },
