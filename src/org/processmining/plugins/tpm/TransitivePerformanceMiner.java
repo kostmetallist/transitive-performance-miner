@@ -1,35 +1,68 @@
 package org.processmining.plugins.tpm;
 
-import org.processmining.contexts.uitopia.*;
-import org.processmining.contexts.uitopia.annotations.*;
-import org.processmining.framework.plugin.*;
-import org.processmining.framework.plugin.annotations.*;
+import java.util.Collection;
 
-import java.util.HashSet;
-import java.util.Set;
+import org.deckfour.uitopia.api.event.TaskListener.InteractionResult;
+import org.deckfour.xes.model.XLog;
 
-@Plugin(name = "TransitivePerformanceMiner",
-    parameterLabels = { "Clusters", "Transitions" },
-    returnLabels = { "ReturnLabel" },
+import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
+import org.processmining.framework.connections.ConnectionCannotBeObtained;
+import org.processmining.framework.plugin.PluginContext;
+import org.processmining.framework.plugin.annotations.Plugin;
+import org.processmining.framework.plugin.annotations.PluginVariant;
+import org.processmining.plugins.tpm.algorithms.TransitivePerformanceMinerAlgorithm;
+import org.processmining.plugins.tpm.connections.TransitivePerformanceMinerConnection;
+import org.processmining.plugins.tpm.parameters.TransitivePerformanceMinerParameters;
+
+// TODO Add help entry
+@Plugin(name = "Run Transitive Performance Miner",
+    parameterLabels = { "Event Log", "Parameters" },
+    returnLabels = { "Visualized Marked Cluster Net" },
     returnTypes = { MarkedClusterNet.class })
-public class TransitivePerformanceMiner {
+public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgorithm {
+	
+	private MarkedClusterNet runConnection(PluginContext context, XLog log,
+			TransitivePerformanceMinerParameters parameters) {
 
-    @UITopiaVariant(affiliation = "ISPRAS",
-        author = "Konstantin Kukushkin",
-        email = "kukushkin@ispras.ru",
-        uiLabel = UITopiaVariant.USEPLUGIN)
+		if (parameters.isTryConnections()) {
+			Collection<TransitivePerformanceMinerConnection> connections;
+			try {
+				connections = context.getConnectionManager().getConnections(
+						TransitivePerformanceMinerConnection.class, context, log);
+
+				for (TransitivePerformanceMinerConnection connection : connections) {
+					if (connection.getObjectWithRole(TransitivePerformanceMinerConnection.LOG).equals(log)
+							&& connection.getParameters().equals(parameters)) {
+						return connection.getObjectWithRole(TransitivePerformanceMinerConnection.MCN);
+					}
+				}
+			} catch (ConnectionCannotBeObtained e) {}
+		}
+
+		MarkedClusterNet mcn = this.apply(context, log, parameters);
+
+		if (parameters.isTryConnections()) {
+			context.getConnectionManager().addConnection(
+					new TransitivePerformanceMinerConnection(log, mcn, parameters));
+		}
+
+		return mcn;
+	}
+
+    // TODO Check UITopiaVariant.EHV
+	// TODO Check set method as static
+	@UITopiaVariant(affiliation = "ISPRAS",
+	        author = "Konstantin Kukushkin",
+	        email = "kukushkin@ispras.ru")
     @PluginVariant(requiredParameterLabels = { 0, 1 })
-    public static MarkedClusterNet buildClusterNet(
+    public MarkedClusterNet buildMarkedClusterNet(
     		final PluginContext context,
-    		final Set<EventCluster> clusters,
-    		final Set<ClusterTransition> transitions) {
+    		final XLog log,
+    		final TransitivePerformanceMinerParameters parameters) {
 
     	System.out.println("With context: " + context);
 
-        MarkedClusterNet mcn = new MarkedClusterNet();
-        mcn.setClusters(clusters);
-        mcn.setClusterTransitions(transitions);
-        return mcn;
+        return runConnection(context, log, parameters);
     }
 
     /**
@@ -38,19 +71,18 @@ public class TransitivePerformanceMiner {
      * @param context
      * 		  Plug-in context to pass forward to underlying methods
      * 
-     * @param clusters
-     * 		  Set of {@code EventCluster}s
+     * @param log
+     * 		  An instance of {@code XLog}
      */
     @UITopiaVariant(affiliation = "ISPRAS",
         author = "Konstantin Kukushkin",
-        email = "kukushkin@ispras.ru",
-        uiLabel = UITopiaVariant.USEPLUGIN)
+        email = "kukushkin@ispras.ru")
     @PluginVariant(requiredParameterLabels = { 0 })
-    public static MarkedClusterNet buildClusterNet(
-    		final UIPluginContext context,
-    		final Set<EventCluster> clusters) {
+    public MarkedClusterNet buildMarkedClusterNet(
+    		final PluginContext context,
+    		final XLog log) {
 
-        Set<ClusterTransition> transitions = new HashSet<ClusterTransition>();
-        return buildClusterNet(context, clusters, transitions);
+    	TransitivePerformanceMinerParameters parameters = new TransitivePerformanceMinerParameters(log);
+        return buildMarkedClusterNet(context, log, parameters);
     }
 }
