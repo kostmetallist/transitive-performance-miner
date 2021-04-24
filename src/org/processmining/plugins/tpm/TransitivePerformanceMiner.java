@@ -2,7 +2,7 @@ package org.processmining.plugins.tpm;
 
 import java.util.Collection;
 
-import org.deckfour.uitopia.api.event.TaskListener.InteractionResult;
+import org.deckfour.xes.model.XAttributeLiteralImpl;
 import org.deckfour.xes.model.XLog;
 
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
@@ -82,7 +82,11 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
     		final PluginContext context,
     		final XLog log) {
 
-    	TransitivePerformanceMinerParameters parameters = new TransitivePerformanceMinerParameters(log);
+    	// TODO setup with extensions
+    	String groupingAttr = "org:resource";
+    	TransitivePerformanceMinerParameters parameters = new TransitivePerformanceMinerParameters(
+    			log, new XAttributeLiteralImpl(groupingAttr, "Pete", null),
+    			new XAttributeLiteralImpl(groupingAttr, "Pete"), new XAttributeLiteralImpl(groupingAttr, "Sara"));
         return buildMarkedClusterNet(context, log, parameters);
     }
 }
