@@ -2,7 +2,7 @@ package org.processmining.plugins.tpm.connections;
 
 import org.deckfour.xes.model.XLog;
 import org.processmining.framework.connections.impl.AbstractConnection;
-import org.processmining.plugins.tpm.MarkedClusterNet;
+import org.processmining.plugins.tpm.model.MarkedClusterNet;
 import org.processmining.plugins.tpm.parameters.TransitivePerformanceMinerParameters;
 
 public class TransitivePerformanceMinerConnection extends AbstractConnection {

@@ -2,9 +2,8 @@ package org.processmining.plugins.tpm.visual;
 
 import org.processmining.plugins.graphviz.dot.Dot;
 import org.processmining.plugins.graphviz.dot.DotNode;
-
-import org.processmining.plugins.tpm.EventCluster;
-import org.processmining.plugins.tpm.MarkedClusterNet;
+import org.processmining.plugins.tpm.model.EventCluster;
+import org.processmining.plugins.tpm.model.MarkedClusterNet;
 import org.processmining.plugins.tpm.util.Pair;
 
 import gnu.trove.map.TIntObjectMap;

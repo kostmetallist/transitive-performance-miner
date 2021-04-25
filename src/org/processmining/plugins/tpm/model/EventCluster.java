@@ -1,4 +1,4 @@
-package org.processmining.plugins.tpm;
+package org.processmining.plugins.tpm.model;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -1,4 +1,4 @@
-package org.processmining.plugins.tpm;
+package org.processmining.plugins.tpm.model;
 
 public class WeightCharacteristic {
 

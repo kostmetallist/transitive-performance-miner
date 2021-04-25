@@ -2,7 +2,7 @@ package org.processmining.plugins.tpm;
 
 import java.util.Collection;
 
-import org.deckfour.xes.model.XAttributeLiteralImpl;
+import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 import org.deckfour.xes.model.XLog;
 
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
@@ -12,7 +12,9 @@ import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.plugins.tpm.algorithms.TransitivePerformanceMinerAlgorithm;
 import org.processmining.plugins.tpm.connections.TransitivePerformanceMinerConnection;
+import org.processmining.plugins.tpm.model.MarkedClusterNet;
 import org.processmining.plugins.tpm.parameters.TransitivePerformanceMinerParameters;
+
 
 // TODO Add help entry
 @Plugin(name = "Run Transitive Performance Miner",
@@ -85,7 +87,7 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
     	// TODO setup with extensions
     	String groupingAttr = "org:resource";
     	TransitivePerformanceMinerParameters parameters = new TransitivePerformanceMinerParameters(
-    			log, new XAttributeLiteralImpl(groupingAttr, "Pete", null),
+    			log, new XAttributeLiteralImpl(groupingAttr, new String()),
     			new XAttributeLiteralImpl(groupingAttr, "Pete"), new XAttributeLiteralImpl(groupingAttr, "Sara"));
         return buildMarkedClusterNet(context, log, parameters);
     }
