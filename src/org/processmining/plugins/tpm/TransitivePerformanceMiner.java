@@ -15,7 +15,6 @@ import org.processmining.plugins.tpm.connections.TransitivePerformanceMinerConne
 import org.processmining.plugins.tpm.model.MarkedClusterNet;
 import org.processmining.plugins.tpm.parameters.TransitivePerformanceMinerParameters;
 
-
 // TODO Add help entry
 @Plugin(name = "Run Transitive Performance Miner",
     parameterLabels = { "Event Log", "Parameters" },

@@ -8,5 +8,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=transitive-performance-miner&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
+	<classpathentry kind="lib" path="jar/javailp-1.2a.jar"/>
+	<classpathentry kind="lib" path="jar/minisatjni1.jar"/>
 	<classpathentry kind="output" path="bindist"/>
 </classpath>

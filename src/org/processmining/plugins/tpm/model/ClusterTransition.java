@@ -1,5 +1,7 @@
 package org.processmining.plugins.tpm.model;
 
+import org.processmining.plugins.tpm.model.weights.WeightCharacteristic;
+
 public class ClusterTransition {
 
 	private EventCluster fromCluster, toCluster;
