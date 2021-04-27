@@ -1,7 +1,6 @@
 package org.processmining.plugins.tpm.algorithms;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +17,7 @@ import net.sf.javailp.Problem;
 import net.sf.javailp.Result;
 import net.sf.javailp.Solver;
 import net.sf.javailp.SolverFactory;
-import net.sf.javailp.SolverFactorySAT4J;
+import net.sf.javailp.SolverFactoryLpSolve;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
@@ -44,7 +43,7 @@ public class TransitivePerformanceMinerAlgorithm {
 	private static final String TRACE_NAME_ATTR = "concept:name";
 	
 	private static double calculateWeightForIJ(int i, int j) {
-		return 1 / (j - i);
+		return 1.0 / (j - i);
 	}
 	
 	private Pair<Map<Integer, List<ClusterTransitionIndicator>>, Map<Integer, List<ClusterTransitionIndicator>>> getOutgoingIngoingMapping(
@@ -61,13 +60,17 @@ public class TransitivePerformanceMinerAlgorithm {
 			if (outgoing.containsKey(i)) {
 				outgoing.get(i).add(cti);
 			} else {
-				outgoing.put(i, Arrays.asList(cti));
+				List<ClusterTransitionIndicator> content = new ArrayList<>();
+				content.add(cti);
+				outgoing.put(i, content);
 			}
 			
 			if (ingoing.containsKey(j)) {
 				ingoing.get(j).add(cti);
 			} else {
-				ingoing.put(j, Arrays.asList(cti));
+				List<ClusterTransitionIndicator> content = new ArrayList<>();
+				content.add(cti);
+				ingoing.put(j, content);
 			}
 		}
 
@@ -84,7 +87,7 @@ public class TransitivePerformanceMinerAlgorithm {
 		LOGGER.debug("Ingoing:");
 		for (int nodeIndex : ingoing.keySet()) {
 
-			LOGGER.debug(String.format("  To   %d:", nodeIndex));
+			LOGGER.debug(String.format("  To %d:", nodeIndex));
 			for (ClusterTransitionIndicator cti : ingoing.get(nodeIndex)) {
 
 				LOGGER.debug(String.format("    %s:", cti));
@@ -98,7 +101,7 @@ public class TransitivePerformanceMinerAlgorithm {
 
 		List<ClusterTransitionIndicator> filteredIndicators = new ArrayList<>();
 		
-		SolverFactory factory = new SolverFactorySAT4J();
+		SolverFactory factory = new SolverFactoryLpSolve();
 		factory.setParameter(Solver.VERBOSE, 0);
 		factory.setParameter(Solver.TIMEOUT, SOLVER_TIMEOUT);
 
@@ -143,7 +146,11 @@ public class TransitivePerformanceMinerAlgorithm {
 		Solver solver = factory.get();
 		Result result = solver.solve(problem);
 		
-		// TODO correctly fill filtered
+		for (ClusterTransitionIndicator cti : initialIndicators) {
+			if (result.getPrimalValue(cti).intValue() == 1) {
+				filteredIndicators.add(cti);
+			}
+		}
 
 		LOGGER.info("Solver result: " + result);
 		return filteredIndicators;
@@ -164,7 +171,7 @@ public class TransitivePerformanceMinerAlgorithm {
 				int j = entry.getIndex();
 				for (TraceSliceEntry previous : previousFromClusterEntries) {
 					
-					int i = previous.getIndex(); 
+					int i = previous.getIndex();
 					indicators.add(new ClusterTransitionIndicator(i, j, calculateWeightForIJ(i, j)));
 				}
 			}
