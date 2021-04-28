@@ -2,6 +2,7 @@ package org.processmining.plugins.tpm;
 
 import java.util.Collection;
 
+import org.deckfour.xes.model.impl.XAttributeContinuousImpl;
 import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 import org.deckfour.xes.model.XLog;
 
@@ -84,10 +85,18 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
     		final XLog log) {
 
     	// TODO setup with extensions
-    	String groupingAttr = "org:resource";
+    	String groupingAttrName = "org:resource";
+    	String fromGroup = "Pete";
+    	String toGroup = "Sara";
+    	String measurementAttrName = "Costs";
+
     	TransitivePerformanceMinerParameters parameters = new TransitivePerformanceMinerParameters(
-    			log, new XAttributeLiteralImpl(groupingAttr, new String()),
-    			new XAttributeLiteralImpl(groupingAttr, "Pete"), new XAttributeLiteralImpl(groupingAttr, "Sara"));
+    			log,
+    			new XAttributeLiteralImpl(groupingAttrName, new String()),
+    			new XAttributeLiteralImpl(groupingAttrName, fromGroup),
+    			new XAttributeLiteralImpl(groupingAttrName, toGroup),
+    			new XAttributeContinuousImpl(measurementAttrName, 0));
+
         return buildMarkedClusterNet(context, log, parameters);
     }
 }

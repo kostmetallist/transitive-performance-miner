@@ -29,11 +29,9 @@ import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
-import org.deckfour.xes.model.impl.XAttributeContinuousImpl;
-import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 import org.processmining.plugins.tpm.model.ClusterTransitionIndicator;
 import org.processmining.plugins.tpm.model.MarkedClusterNet;
-import org.processmining.plugins.tpm.model.TraceSliceEntry;
+import org.processmining.plugins.tpm.model.TraceEntry;
 import org.processmining.plugins.tpm.parameters.TransitivePerformanceMinerParameters;
 import org.processmining.plugins.tpm.util.Pair;
 import org.processmining.framework.plugin.PluginContext;
@@ -57,6 +55,9 @@ public class TransitivePerformanceMinerAlgorithm {
 			LOGGER.error(String.format("Cannot calculate measurement for unexisting attribute %s", measurable.getKey()));
 			return 0;
 		}
+		
+		LOGGER.debug("1st: " + fromAttributes.get(measurable.getKey()));
+		LOGGER.debug("2nd: " + toAttributes.get(measurable.getKey()));
 		
 		// TODO replace with more relevant calculation
 		return fromAttributes.get(measurable.getKey()).compareTo(toAttributes.get(measurable.getKey()));
@@ -168,20 +169,20 @@ public class TransitivePerformanceMinerAlgorithm {
 		return filteredIndicators;
 	}
 	
-	private List<ClusterTransitionIndicator> gatherTransitionIndicators(List<TraceSliceEntry> traceSliceEntries,
+	private List<ClusterTransitionIndicator> gatherTransitionIndicators(List<TraceEntry> traceSliceEntries,
 			XAttribute attrFrom, XAttribute attrTo) {
 		
 		List<ClusterTransitionIndicator> indicators = new ArrayList<>();
-		Set<TraceSliceEntry> previousFromClusterEntries = new HashSet<>();
+		Set<TraceEntry> previousFromClusterEntries = new HashSet<>();
 
-		for (TraceSliceEntry entry : traceSliceEntries) {
+		for (TraceEntry entry : traceSliceEntries) {
 			if (entry.getGroupId().equals(attrFrom)) {
 				previousFromClusterEntries.add(entry);
 
 			} else if (entry.getGroupId().equals(attrTo)) {
 				
 				int j = entry.getIndex();
-				for (TraceSliceEntry previous : previousFromClusterEntries) {
+				for (TraceEntry previous : previousFromClusterEntries) {
 					
 					int i = previous.getIndex();
 					indicators.add(new ClusterTransitionIndicator(i, j, calculateWeightForIJ(i, j)));
@@ -203,16 +204,17 @@ public class TransitivePerformanceMinerAlgorithm {
 		
 		// TODO print out relative frequency of tracked attribute @code{groupingAttrName}
 
-		Map<String, List<TraceSliceEntry>> slicesByTraces = new HashMap<>();
+		Map<String, List<TraceEntry>> tracesWithMatchedEvents = new HashMap<>();
+		Map<Integer, Integer> globalToLocalIndices = new HashMap<>();
 		ProgressBarBuilder pbb = new ProgressBarBuilder();
 		pbb.setStyle(ProgressBarStyle.ASCII);
 
 		for (XTrace trace : ProgressBar.wrap(log, pbb)) {
 
-			List<TraceSliceEntry> matchedEventsWithPositions = new ArrayList<>();
-			slicesByTraces.put(trace.getAttributes().get(TRACE_NAME_ATTR).toString(), matchedEventsWithPositions);
+			List<TraceEntry> matchedEventsWithPositions = new ArrayList<>();
+			tracesWithMatchedEvents.put(trace.getAttributes().get(TRACE_NAME_ATTR).toString(), matchedEventsWithPositions);
 
-			for (int i = 0; i < trace.size(); i++) {
+			for (int i = 0, j = 0; i < trace.size(); i++) {
 				
 				XEvent event = trace.get(i);
 				XAttributeMap eventAttributes = event.getAttributes();
@@ -221,7 +223,8 @@ public class TransitivePerformanceMinerAlgorithm {
 						(eventAttributes.get(groupingAttrName).equals(parameters.getFromValue()) ||
 						 eventAttributes.get(groupingAttrName).equals(parameters.getToValue()))) {
 
-					matchedEventsWithPositions.add(new TraceSliceEntry(event, eventAttributes.get(groupingAttrName), i));
+					matchedEventsWithPositions.add(new TraceEntry(event, eventAttributes.get(groupingAttrName), i));
+					globalToLocalIndices.put(i, j++);
 				}
 			}
 		}
@@ -229,11 +232,11 @@ public class TransitivePerformanceMinerAlgorithm {
 		if (LOGGER.getLevel().isLessSpecificThan(Level.DEBUG)) {
 
 			LOGGER.debug("Dumping collected events:");
-			for (Map.Entry<String, List<TraceSliceEntry>> entry : slicesByTraces.entrySet()) {
+			for (Map.Entry<String, List<TraceEntry>> entry : tracesWithMatchedEvents.entrySet()) {
 
 				LOGGER.debug(String.format("For trace %s", entry.getKey()));
-				for (TraceSliceEntry tse : entry.getValue()) {
-					LOGGER.debug(String.format("  %s", tse));
+				for (TraceEntry traceEntry : entry.getValue()) {
+					LOGGER.debug(String.format("  %s", traceEntry));
 				}
 			}
 		}
@@ -241,13 +244,13 @@ public class TransitivePerformanceMinerAlgorithm {
 		Map<String, Double> estimationsByTraces = new HashMap<>();
 		
 		LOGGER.info("Starting gathering and filtering transition indicators...");
-		for (Map.Entry<String, List<TraceSliceEntry>> entry : ProgressBar.wrap(slicesByTraces.entrySet(), pbb)) {
+		for (Map.Entry<String, List<TraceEntry>> entry : ProgressBar.wrap(tracesWithMatchedEvents.entrySet(), pbb)) {
 
 			LOGGER.debug(String.format("Processing trace %s", entry.getKey()));
 
-			List<TraceSliceEntry> sliceEntries = entry.getValue();
+			List<TraceEntry> traceEntries = entry.getValue();
 			List<ClusterTransitionIndicator> initial = gatherTransitionIndicators(
-					sliceEntries, parameters.getFromValue(), parameters.getToValue());
+					traceEntries, parameters.getFromValue(), parameters.getToValue());
 			List<ClusterTransitionIndicator> filtered = selectOptimalTransitions(initial);
 
 			LOGGER.debug("  Initial:");
@@ -267,13 +270,15 @@ public class TransitivePerformanceMinerAlgorithm {
 			} else {
 				LOGGER.debug("    <EMPTY>");
 			}
-			
-			// TODO transit value from parameters
+
 			for (ClusterTransitionIndicator cti : filtered) {
+				LOGGER.debug("Length: " + traceEntries.size());
+				LOGGER.debug(cti.getFromClusterNodeIndex());
+				LOGGER.debug(cti.getToClusterNodeIndex());
 				estimationsByTraces.put(entry.getKey(), calculateSliceMeasurement(
-						sliceEntries.get(cti.getFromClusterNodeIndex()).getEvent(),
-						sliceEntries.get(cti.getToClusterNodeIndex()).getEvent(),
-						new XAttributeContinuousImpl("Costs", 0)));
+						traceEntries.get(globalToLocalIndices.get(cti.getFromClusterNodeIndex())).getEvent(),
+						traceEntries.get(globalToLocalIndices.get(cti.getToClusterNodeIndex())).getEvent(),
+						parameters.getMeasurementAttr()));
 			}
 		}
 		
