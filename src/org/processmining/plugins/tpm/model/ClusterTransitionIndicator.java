@@ -50,6 +50,6 @@ public class ClusterTransitionIndicator {
 	
 	@Override
 	public String toString() {
-		return String.format("i=%d j=%d: <%f>", fromClusterNodeIndex, toClusterNodeIndex, simpleWeightChar.getValue());
+		return String.format("%d -> %d: <%f>", fromClusterNodeIndex, toClusterNodeIndex, simpleWeightChar.getValue());
 	}
 }

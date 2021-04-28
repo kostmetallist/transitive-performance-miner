@@ -29,6 +29,8 @@ import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
+import org.deckfour.xes.model.impl.XAttributeContinuousImpl;
+import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 import org.processmining.plugins.tpm.model.ClusterTransitionIndicator;
 import org.processmining.plugins.tpm.model.MarkedClusterNet;
 import org.processmining.plugins.tpm.model.TraceSliceEntry;
@@ -44,6 +46,20 @@ public class TransitivePerformanceMinerAlgorithm {
 	
 	private static double calculateWeightForIJ(int i, int j) {
 		return 1.0 / (j - i);
+	}
+	
+	private static double calculateSliceMeasurement(XEvent from, XEvent to, XAttribute measurable) {
+
+		XAttributeMap fromAttributes = from.getAttributes(),
+					  toAttributes = to.getAttributes();
+		
+		if (!fromAttributes.containsKey(measurable.getKey()) || !toAttributes.containsKey(measurable.getKey())) {
+			LOGGER.error(String.format("Cannot calculate measurement for unexisting attribute %s", measurable.getKey()));
+			return 0;
+		}
+		
+		// TODO replace with more relevant calculation
+		return fromAttributes.get(measurable.getKey()).compareTo(toAttributes.get(measurable.getKey()));
 	}
 	
 	private Pair<Map<Integer, List<ClusterTransitionIndicator>>, Map<Integer, List<ClusterTransitionIndicator>>> getOutgoingIngoingMapping(
@@ -105,11 +121,12 @@ public class TransitivePerformanceMinerAlgorithm {
 		factory.setParameter(Solver.VERBOSE, 0);
 		factory.setParameter(Solver.TIMEOUT, SOLVER_TIMEOUT);
 
-		Problem problem = new Problem();
 		Linear target = new Linear();
+		Problem problem = new Problem();
 
 		for (ClusterTransitionIndicator cti : initialIndicators) {
 			target.add(cti.getSimpleWeightChar().getValue(), cti);
+			problem.setVarType(cti, Boolean.class);
 		}
 
 		problem.setObjective(target, OptType.MAX);
@@ -137,14 +154,10 @@ public class TransitivePerformanceMinerAlgorithm {
 			problem.add(constraint, "<=", 1);
 		}
 
-		// TODO check possibility of binding variable types in previous loops
-		for (ClusterTransitionIndicator cti : initialIndicators) {
-			problem.setVarType(cti, Boolean.class);
-		}
-
-		// The solver is supposed to be used only once for one problem
+		// The solver is supposed to be used only once per problem
 		Solver solver = factory.get();
 		Result result = solver.solve(problem);
+		LOGGER.debug("Solver result: " + result);
 		
 		for (ClusterTransitionIndicator cti : initialIndicators) {
 			if (result.getPrimalValue(cti).intValue() == 1) {
@@ -152,7 +165,6 @@ public class TransitivePerformanceMinerAlgorithm {
 			}
 		}
 
-		LOGGER.info("Solver result: " + result);
 		return filteredIndicators;
 	}
 	
@@ -219,31 +231,59 @@ public class TransitivePerformanceMinerAlgorithm {
 			LOGGER.debug("Dumping collected events:");
 			for (Map.Entry<String, List<TraceSliceEntry>> entry : slicesByTraces.entrySet()) {
 
-				LOGGER.debug(String.format("  Trace %s", entry.getKey()));
+				LOGGER.debug(String.format("For trace %s", entry.getKey()));
 				for (TraceSliceEntry tse : entry.getValue()) {
-					LOGGER.debug(String.format("    %s", tse));
+					LOGGER.debug(String.format("  %s", tse));
 				}
 			}
 		}
 		
-		LOGGER.debug("Starting gathering and filtering transition indicators...");
-		for (Map.Entry<String, List<TraceSliceEntry>> entry : slicesByTraces.entrySet()) {
+		Map<String, Double> estimationsByTraces = new HashMap<>();
+		
+		LOGGER.info("Starting gathering and filtering transition indicators...");
+		for (Map.Entry<String, List<TraceSliceEntry>> entry : ProgressBar.wrap(slicesByTraces.entrySet(), pbb)) {
 
-			LOGGER.debug(String.format("  For trace %s", entry.getKey()));
+			LOGGER.debug(String.format("Processing trace %s", entry.getKey()));
 
+			List<TraceSliceEntry> sliceEntries = entry.getValue();
 			List<ClusterTransitionIndicator> initial = gatherTransitionIndicators(
-					entry.getValue(), parameters.getFromValue(), parameters.getToValue());
+					sliceEntries, parameters.getFromValue(), parameters.getToValue());
 			List<ClusterTransitionIndicator> filtered = selectOptimalTransitions(initial);
 
 			LOGGER.debug("  Initial:");
-			for (ClusterTransitionIndicator cti : initial) {
-				LOGGER.debug(String.format("    %s", cti.toString()));
+			if (!initial.isEmpty()) {
+				for (ClusterTransitionIndicator cti : initial) {
+					LOGGER.debug(String.format("    %s", cti.toString()));
+				}
+			} else {
+				LOGGER.debug("    <EMPTY>");
 			}
 			
 			LOGGER.debug("  Filtered:");
-			for (ClusterTransitionIndicator cti : filtered) {
-				LOGGER.debug(String.format("    %s", cti.toString()));
+			if (!filtered.isEmpty()) {
+				for (ClusterTransitionIndicator cti : filtered) {
+					LOGGER.debug(String.format("    %s", cti.toString()));
+				}
+			} else {
+				LOGGER.debug("    <EMPTY>");
 			}
+			
+			// TODO transit value from parameters
+			for (ClusterTransitionIndicator cti : filtered) {
+				estimationsByTraces.put(entry.getKey(), calculateSliceMeasurement(
+						sliceEntries.get(cti.getFromClusterNodeIndex()).getEvent(),
+						sliceEntries.get(cti.getToClusterNodeIndex()).getEvent(),
+						new XAttributeContinuousImpl("Costs", 0)));
+			}
+		}
+		
+		LOGGER.debug("Calculated estimations:");
+		if (!estimationsByTraces.isEmpty()) {
+			for (Map.Entry<String, Double> item : estimationsByTraces.entrySet()) {
+				LOGGER.debug(String.format("  %s: %f", item.getKey(), item.getValue()));
+			}
+		} else {
+			LOGGER.debug("  <EMPTY>");
 		}
 
 		return new MarkedClusterNet();
