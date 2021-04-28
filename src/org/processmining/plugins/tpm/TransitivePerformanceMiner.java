@@ -20,7 +20,8 @@ import org.processmining.plugins.tpm.parameters.TransitivePerformanceMinerParame
 @Plugin(name = "Run Transitive Performance Miner",
     parameterLabels = { "Event Log", "Parameters" },
     returnLabels = { "Visualized Marked Cluster Net" },
-    returnTypes = { MarkedClusterNet.class })
+    returnTypes = { MarkedClusterNet.class },
+    help = TransitivePerformanceMinerHelp.TEXT)
 public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgorithm {
 	
 	private MarkedClusterNet runConnection(PluginContext context, XLog log,
