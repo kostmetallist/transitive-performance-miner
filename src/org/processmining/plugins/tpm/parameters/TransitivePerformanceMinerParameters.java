@@ -2,8 +2,8 @@ package org.processmining.plugins.tpm.parameters;
 
 import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.model.XAttribute;
-import org.deckfour.xes.model.XAttributeContinuous;
 import org.deckfour.xes.model.XAttributeLiteral;
+import org.deckfour.xes.model.XAttributeTimestamp;
 import org.deckfour.xes.model.XLog;
 import org.processmining.basicutils.parameters.impl.PluginParametersImpl;
 import org.processmining.log.parameters.ClassifierParameter;
@@ -13,12 +13,13 @@ public class TransitivePerformanceMinerParameters extends PluginParametersImpl i
 
 	private XEventClassifier classifier;
 	private XAttribute groupingAttr;
+	// TODO change to Comparable<?>
 	private XAttributeLiteral fromValue;
 	private XAttributeLiteral toValue;
-	private XAttributeContinuous measurementAttr;
+	private XAttributeTimestamp measurementAttr;
 
 	public TransitivePerformanceMinerParameters(XLog log, XAttribute groupingAttr,
-			XAttributeLiteral fromValue, XAttributeLiteral toValue, XAttributeContinuous measurementAttr) {
+			XAttributeLiteral fromValue, XAttributeLiteral toValue, XAttributeTimestamp measurementAttr) {
 
 		super();
 		setClassifier(XUtils.getDefaultClassifier(log));
@@ -81,11 +82,11 @@ public class TransitivePerformanceMinerParameters extends PluginParametersImpl i
 		this.toValue = toValue;
 	}
 	
-	public XAttributeContinuous getMeasurementAttr() {
+	public XAttributeTimestamp getMeasurementAttr() {
 		return measurementAttr;
 	}
 
-	public void setMeasurementAttr(XAttributeContinuous measurementAttr) {
+	public void setMeasurementAttr(XAttributeTimestamp measurementAttr) {
 		this.measurementAttr = measurementAttr;
 	}
 }

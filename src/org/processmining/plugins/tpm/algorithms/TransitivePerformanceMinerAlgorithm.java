@@ -25,6 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.deckfour.xes.info.XLogInfo;
 import org.deckfour.xes.info.XLogInfoFactory;
 import org.deckfour.xes.model.XAttribute;
+import org.deckfour.xes.model.XAttributeTimestamp;
 import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
@@ -46,7 +47,7 @@ public class TransitivePerformanceMinerAlgorithm {
 		return 1.0 / (j - i);
 	}
 	
-	private static double calculateSliceMeasurement(XEvent from, XEvent to, XAttribute measurable) {
+	private static double calculateSliceMeasurement(XEvent from, XEvent to, XAttributeTimestamp measurable) {
 
 		XAttributeMap fromAttributes = from.getAttributes(),
 					  toAttributes = to.getAttributes();
@@ -56,11 +57,10 @@ public class TransitivePerformanceMinerAlgorithm {
 			return 0;
 		}
 		
-		LOGGER.debug("1st: " + fromAttributes.get(measurable.getKey()));
-		LOGGER.debug("2nd: " + toAttributes.get(measurable.getKey()));
-		
-		// TODO replace with more relevant calculation
-		return fromAttributes.get(measurable.getKey()).compareTo(toAttributes.get(measurable.getKey()));
+		long fromTs = ((XAttributeTimestamp) fromAttributes.get(measurable.getKey())).getValueMillis();
+		long toTs = ((XAttributeTimestamp) toAttributes.get(measurable.getKey())).getValueMillis();
+
+		return toTs - fromTs;
 	}
 	
 	private Pair<Map<Integer, List<ClusterTransitionIndicator>>, Map<Integer, List<ClusterTransitionIndicator>>> getOutgoingIngoingMapping(
@@ -278,7 +278,7 @@ public class TransitivePerformanceMinerAlgorithm {
 				estimationsByTraces.put(entry.getKey(), calculateSliceMeasurement(
 						traceEntries.get(globalToLocalIndices.get(cti.getFromClusterNodeIndex())).getEvent(),
 						traceEntries.get(globalToLocalIndices.get(cti.getToClusterNodeIndex())).getEvent(),
-						parameters.getMeasurementAttr()));
+						parameters.getMeasurementAttr()) / filtered.size());
 			}
 		}
 		

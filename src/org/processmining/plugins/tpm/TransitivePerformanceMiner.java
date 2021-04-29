@@ -2,8 +2,8 @@ package org.processmining.plugins.tpm;
 
 import java.util.Collection;
 
-import org.deckfour.xes.model.impl.XAttributeContinuousImpl;
 import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
+import org.deckfour.xes.model.impl.XAttributeTimestampImpl;
 import org.deckfour.xes.model.XLog;
 
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
@@ -16,7 +16,6 @@ import org.processmining.plugins.tpm.connections.TransitivePerformanceMinerConne
 import org.processmining.plugins.tpm.model.MarkedClusterNet;
 import org.processmining.plugins.tpm.parameters.TransitivePerformanceMinerParameters;
 
-// TODO Add help entry
 @Plugin(name = "Run Transitive Performance Miner",
     parameterLabels = { "Event Log", "Parameters" },
     returnLabels = { "Visualized Marked Cluster Net" },
@@ -52,7 +51,6 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
 		return mcn;
 	}
 
-    // TODO Check UITopiaVariant.EHV
 	// TODO Check set method as static
 	@UITopiaVariant(affiliation = "ISPRAS",
 	        author = "Konstantin Kukushkin",
@@ -89,14 +87,14 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
     	String groupingAttrName = "org:resource";
     	String fromGroup = "Pete";
     	String toGroup = "Sara";
-    	String measurementAttrName = "Costs";
+    	String measurementAttrName = "time:timestamp";
 
     	TransitivePerformanceMinerParameters parameters = new TransitivePerformanceMinerParameters(
     			log,
     			new XAttributeLiteralImpl(groupingAttrName, new String()),
     			new XAttributeLiteralImpl(groupingAttrName, fromGroup),
     			new XAttributeLiteralImpl(groupingAttrName, toGroup),
-    			new XAttributeContinuousImpl(measurementAttrName, 0));
+    			new XAttributeTimestampImpl(measurementAttrName, 0));
 
         return buildMarkedClusterNet(context, log, parameters);
     }
