@@ -281,7 +281,7 @@ public class TransitivePerformanceMinerAlgorithm {
 						parameters.getMeasurementAttr()) / filtered.size());
 			}
 		}
-		
+
 		LOGGER.debug("Calculated estimations:");
 		if (!estimationsByTraces.isEmpty()) {
 			for (Map.Entry<String, Double> item : estimationsByTraces.entrySet()) {

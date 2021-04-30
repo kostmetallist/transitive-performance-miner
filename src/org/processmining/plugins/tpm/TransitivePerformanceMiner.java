@@ -2,13 +2,15 @@ package org.processmining.plugins.tpm;
 
 import java.util.Collection;
 
+import org.deckfour.uitopia.api.event.TaskListener.InteractionResult;
 import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 import org.deckfour.xes.model.impl.XAttributeTimestampImpl;
 import org.deckfour.xes.model.XLog;
 
+import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.connections.ConnectionCannotBeObtained;
-import org.processmining.framework.plugin.PluginContext;
+import org.processmining.framework.plugin.PluginContext;  // TODO check availability in org.processmining.contexts.uitopia
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.plugins.tpm.algorithms.TransitivePerformanceMinerAlgorithm;
@@ -50,6 +52,25 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
 
 		return mcn;
 	}
+	
+	@UITopiaVariant(affiliation = "ISPRAS",
+	        author = "Konstantin Kukushkin",
+	        email = "kukushkin@ispras.ru")
+    @PluginVariant(requiredParameterLabels = { 0 })
+    public MarkedClusterNet buildMarkedClusterNetUI(
+    		final UIPluginContext context,
+    		final XLog log) {
+
+		TransitivePerformanceMinerParameters parameters = new TransitivePerformanceMinerParameters(log);
+		TransitivePerformanceMinerDialog dialog = new TransitivePerformanceMinerDialog(log, parameters);
+		InteractionResult iResult = context.showWizard("Set parameters for the miner (classifier)", true, true, dialog);
+		
+		if (iResult != InteractionResult.FINISHED) {
+			return null;
+		}
+
+        return runConnection(context, log, parameters);
+    }
 
 	// TODO Check set method as static
 	@UITopiaVariant(affiliation = "ISPRAS",
