@@ -17,11 +17,9 @@ public class TransitivePerformanceMinerParameters extends PluginParametersImpl i
 	private XAttributeLiteral fromValue;
 	private XAttributeLiteral toValue;
 	private XAttributeTimestamp measurementAttr;
-	
-	public TransitivePerformanceMinerParameters(XLog log) {
 
+	public TransitivePerformanceMinerParameters() {
 		super();
-		setClassifier(XUtils.getDefaultClassifier(log));
 		setTryConnections(true);
 	}
 

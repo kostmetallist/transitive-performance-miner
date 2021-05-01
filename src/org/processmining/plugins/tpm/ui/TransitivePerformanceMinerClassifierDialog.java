@@ -1,12 +1,10 @@
-package org.processmining.plugins.tpm;
+package org.processmining.plugins.tpm.ui;
 
 import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.JPanel;
 
 import org.deckfour.xes.classification.XEventAndClassifier;
 import org.deckfour.xes.classification.XEventClassifier;
@@ -17,11 +15,12 @@ import org.deckfour.xes.model.XLog;
 import org.processmining.log.dialogs.ClassifierPanel;
 import org.processmining.plugins.tpm.parameters.TransitivePerformanceMinerParameters;
 
-public class TransitivePerformanceMinerDialog extends JPanel {
+public class TransitivePerformanceMinerClassifierDialog extends WizardStep {
 
 	private static final long serialVersionUID = -1060558585823462314L;
 
-	public TransitivePerformanceMinerDialog(XLog log, TransitivePerformanceMinerParameters parameters) {
+	public TransitivePerformanceMinerClassifierDialog(XLog log, TransitivePerformanceMinerParameters parameters) {
+
 		double size[][] = { { TableLayoutConstants.FILL }, { TableLayoutConstants.FILL } };
 		setLayout(new TableLayout(size));
 		List<XEventClassifier> availableClassifiers = new ArrayList<XEventClassifier>();
@@ -34,4 +33,6 @@ public class TransitivePerformanceMinerDialog extends JPanel {
 
 		add(new ClassifierPanel(availableClassifiers, parameters), "0, 0");
 	}
+	
+	public void fillSettings() {}
 }

@@ -22,6 +22,7 @@ import net.sf.javailp.SolverFactoryLpSolve;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+
 import org.deckfour.xes.info.XLogInfo;
 import org.deckfour.xes.info.XLogInfoFactory;
 import org.deckfour.xes.model.XAttribute;
@@ -30,6 +31,8 @@ import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
+
+import org.processmining.log.utils.XUtils;
 import org.processmining.plugins.tpm.model.ClusterTransitionIndicator;
 import org.processmining.plugins.tpm.model.MarkedClusterNet;
 import org.processmining.plugins.tpm.model.TraceEntry;
@@ -57,8 +60,8 @@ public class TransitivePerformanceMinerAlgorithm {
 			return 0;
 		}
 		
-		long fromTs = ((XAttributeTimestamp) fromAttributes.get(measurable.getKey())).getValueMillis();
-		long toTs = ((XAttributeTimestamp) toAttributes.get(measurable.getKey())).getValueMillis();
+		long fromTs = XUtils.getTimestamp(from).getTime();
+		long toTs = XUtils.getTimestamp(to).getTime();
 
 		return toTs - fromTs;
 	}
@@ -212,6 +215,7 @@ public class TransitivePerformanceMinerAlgorithm {
 		for (XTrace trace : ProgressBar.wrap(log, pbb)) {
 
 			List<TraceEntry> matchedEventsWithPositions = new ArrayList<>();
+			// TODO replace with XUtils.getConceptName?
 			tracesWithMatchedEvents.put(trace.getAttributes().get(TRACE_NAME_ATTR).toString(), matchedEventsWithPositions);
 
 			for (int i = 0, j = 0; i < trace.size(); i++) {
@@ -272,9 +276,7 @@ public class TransitivePerformanceMinerAlgorithm {
 			}
 
 			for (ClusterTransitionIndicator cti : filtered) {
-				LOGGER.debug("Length: " + traceEntries.size());
-				LOGGER.debug(cti.getFromClusterNodeIndex());
-				LOGGER.debug(cti.getToClusterNodeIndex());
+
 				estimationsByTraces.put(entry.getKey(), calculateSliceMeasurement(
 						traceEntries.get(globalToLocalIndices.get(cti.getFromClusterNodeIndex())).getEvent(),
 						traceEntries.get(globalToLocalIndices.get(cti.getToClusterNodeIndex())).getEvent(),

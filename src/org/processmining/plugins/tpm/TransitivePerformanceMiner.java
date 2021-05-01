@@ -2,7 +2,6 @@ package org.processmining.plugins.tpm;
 
 import java.util.Collection;
 
-import org.deckfour.uitopia.api.event.TaskListener.InteractionResult;
 import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 import org.deckfour.xes.model.impl.XAttributeTimestampImpl;
 import org.deckfour.xes.model.XLog;
@@ -10,13 +9,15 @@ import org.deckfour.xes.model.XLog;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.connections.ConnectionCannotBeObtained;
-import org.processmining.framework.plugin.PluginContext;  // TODO check availability in org.processmining.contexts.uitopia
+import org.processmining.framework.plugin.PluginContext;
+import org.processmining.framework.plugin.Progress;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.plugins.tpm.algorithms.TransitivePerformanceMinerAlgorithm;
 import org.processmining.plugins.tpm.connections.TransitivePerformanceMinerConnection;
 import org.processmining.plugins.tpm.model.MarkedClusterNet;
 import org.processmining.plugins.tpm.parameters.TransitivePerformanceMinerParameters;
+import org.processmining.plugins.tpm.ui.TransitivePerformanceMinerUI;
 
 @Plugin(name = "Run Transitive Performance Miner",
     parameterLabels = { "Event Log", "Parameters" },
@@ -28,6 +29,11 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
 	private MarkedClusterNet runConnection(PluginContext context, XLog log,
 			TransitivePerformanceMinerParameters parameters) {
 
+		Progress progress = context.getProgress();
+		progress.setMaximum(100);
+
+		progress.setValue(0);
+		progress.setCaption("Setting up connection between plugin artifacts...");
 		if (parameters.isTryConnections()) {
 			Collection<TransitivePerformanceMinerConnection> connections;
 			try {
@@ -43,6 +49,8 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
 			} catch (ConnectionCannotBeObtained e) {}
 		}
 
+		progress.setValue(20);
+		progress.setCaption("Performing event log processing...");
 		MarkedClusterNet mcn = this.apply(context, log, parameters);
 
 		if (parameters.isTryConnections()) {
@@ -50,6 +58,8 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
 					new TransitivePerformanceMinerConnection(log, mcn, parameters));
 		}
 
+		progress.setValue(100);
+		progress.setCaption("Done!");
 		return mcn;
 	}
 	
@@ -61,18 +71,18 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
     		final UIPluginContext context,
     		final XLog log) {
 
-		TransitivePerformanceMinerParameters parameters = new TransitivePerformanceMinerParameters(log);
-		TransitivePerformanceMinerDialog dialog = new TransitivePerformanceMinerDialog(log, parameters);
-		InteractionResult iResult = context.showWizard("Set parameters for the miner (classifier)", true, true, dialog);
+		TransitivePerformanceMinerUI ui = new TransitivePerformanceMinerUI(context, log);
+		TransitivePerformanceMinerParameters parameters = ui.gatherParameters();
 		
-		if (iResult != InteractionResult.FINISHED) {
-			return null;
-		}
+		System.out.println("parameters.classifier : " + parameters.getClassifier());
+		System.out.println("parameters.grouping   : " + parameters.getGroupingAttr());
+		System.out.println("parameters.fromval    : " + parameters.getFromValue());
+		System.out.println("parameters.toval      : " + parameters.getToValue());
+		System.out.println("parameters.measurments: " + parameters.getMeasurementAttr());
 
         return runConnection(context, log, parameters);
     }
 
-	// TODO Check set method as static
 	@UITopiaVariant(affiliation = "ISPRAS",
 	        author = "Konstantin Kukushkin",
 	        email = "kukushkin@ispras.ru")
@@ -81,8 +91,6 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
     		final PluginContext context,
     		final XLog log,
     		final TransitivePerformanceMinerParameters parameters) {
-
-    	System.out.println("With context: " + context);
 
         return runConnection(context, log, parameters);
     }
