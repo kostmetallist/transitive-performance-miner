@@ -73,12 +73,6 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
 
 		TransitivePerformanceMinerUI ui = new TransitivePerformanceMinerUI(context, log);
 		TransitivePerformanceMinerParameters parameters = ui.gatherParameters();
-		
-		System.out.println("parameters.classifier : " + parameters.getClassifier());
-		System.out.println("parameters.grouping   : " + parameters.getGroupingAttr());
-		System.out.println("parameters.fromval    : " + parameters.getFromValue());
-		System.out.println("parameters.toval      : " + parameters.getToValue());
-		System.out.println("parameters.measurments: " + parameters.getMeasurementAttr());
 
         return runConnection(context, log, parameters);
     }

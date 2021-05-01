@@ -28,6 +28,7 @@
 
     <!-- Third party library downloaded from maven repository. -->
     <dependency conf="lib->default" org="me.tongfei" name="progressbar" rev="0.9.1" />
+    <dependency conf="lib->default" org="org.apache.commons" name="commons-text" rev="1.8" />
     <dependency conf="lib->default" org="org.apache.logging.log4j" name="log4j-api" rev="2.14.1" />
     <dependency conf="lib->default" org="org.apache.logging.log4j" name="log4j-core" rev="2.14.1" />
     <dependency conf="lib->default" org="org.ow2.sat4j" name="org.ow2.sat4j.core" rev="2.3.4" />

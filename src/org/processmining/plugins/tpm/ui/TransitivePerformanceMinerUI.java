@@ -14,6 +14,11 @@ import org.processmining.plugins.tpm.parameters.TransitivePerformanceMinerParame
 
 public class TransitivePerformanceMinerUI {
 	
+	private enum WizardDirection {
+		PREV,
+		NEXT
+	}
+	
 	private static final Logger LOGGER = LogManager.getRootLogger();
 	
 	private TransitivePerformanceMinerParameters parameters;
@@ -34,17 +39,16 @@ public class TransitivePerformanceMinerUI {
 		this.wizardStepsNumber = wizardSteps.size();
 		this.currentStep = 0;
 	}
-	
-	// TODO replace position with enum
-	private int go(int direction) {
 
-		if (currentStep == 0 && direction == -1 ||
-				currentStep == (wizardStepsNumber - 1) && direction == 1) {
+	private int go(WizardDirection direction) {
+
+		if (currentStep == 0 && direction == WizardDirection.PREV ||
+				currentStep == (wizardStepsNumber - 1) && direction == WizardDirection.NEXT) {
 
 			return currentStep;
 		}
 
-		currentStep += direction;
+		currentStep += (direction == WizardDirection.NEXT)? 1: -1;
 		return currentStep;
 	}
 	
@@ -53,34 +57,31 @@ public class TransitivePerformanceMinerUI {
 		InteractionResult result = InteractionResult.NEXT;
 		
 		while (true) {
-//			if (currentStep < 0) {
-//				currentStep = 0;
-//			}
-//			if (currentStep >= wizardStepsNumber) {
-//				currentStep = wizardStepsNumber - 1;
-//			}
 
-			LOGGER.info("Current step: " + currentStep);
+			LOGGER.debug(String.format("Current wizard step: %d", currentStep));
 
 			WizardStep ws = wizardSteps.get(currentStep);
-			result = context.showWizard(String.format("Transitive Performance Miner configuration step %d", currentStep),
+			result = context.showWizard(String.format("Transitive Performance Miner configuration step %d", currentStep + 1),
 					currentStep == 0, currentStep == wizardStepsNumber - 1, ws);
 			
 			switch (result) {
 
 			case NEXT:
-				go(1);
+				go(WizardDirection.NEXT);
 				break;
 
 			case PREV:
-				go(-1);
+				go(WizardDirection.PREV);
 				break;
 
 			case FINISHED:
 				ws.fillSettings();
-//				if(!checkGEDScores(activitySet)){
-//					JOptionPane.showMessageDialog(new JFrame(), "<HTML>Generic Edit Distance has been chosen as the distance metric type. <BR>There is a problem in scoring files provided as input.<BR> Either the files are missing/corrupt <BR>or the content of the file doesn't comply with the format <BR>or the set of activities in the file does not match with the activities in the log file <BR></HTML>");
-//				}
+				LOGGER.info(String.format("parameters.classifier      : %s", parameters.getClassifier()));
+				LOGGER.info(String.format("parameters.groupingAttr    : %s", parameters.getGroupingAttr().getKey()));
+				LOGGER.info(String.format("parameters.fromValue       : %s", parameters.getFromValue()));
+				LOGGER.info(String.format("parameters.toValue         : %s", parameters.getToValue()));
+				LOGGER.info(String.format("parameters.measurementAttr : %s", parameters.getMeasurementAttr().getKey()));
+
 				return parameters;
 
 			default:

@@ -9,15 +9,17 @@ import com.fluxicon.slickerbox.factory.SlickerFactory;
 //import java.awt.event.ActionListener;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -25,21 +27,26 @@ import org.deckfour.xes.model.XAttribute;
 import org.deckfour.xes.model.XAttributeTimestamp;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
+
 import org.processmining.plugins.tpm.parameters.TransitivePerformanceMinerParameters;
 
 public class TransitivePerformanceMinerClusterizationAndFilteringDialog extends WizardStep {
 
 	private static final long serialVersionUID = -2130094545823451112L;
+	private static final String STANDARD_GROUPING_ATTRIBUTE = "resource";
+	private static final String STANDARD_MEASUREMENT_ATTRIBUTE = "timestamp";
 	private static final Logger LOGGER = LogManager.getRootLogger(); 
 	
 	private final XLog log;
 	// FIXME remove final if any problems with persisting values
 	private final TransitivePerformanceMinerParameters parameters;
+	
+	private Map<String, XAttribute> attributesMapping;
 
 	private JPanel clusterizationPanel;
 	private JPanel anomaliesPanel;
 
-	private JComboBox<XAttribute> groupingAttributeComboBox, measurementAttributeComboBox;
+	private JComboBox<String> groupingAttributeComboBox, measurementAttributeComboBox;
 
 	private JLabel groupingAttributeLabel, fromGroupingValueLabel, toGroupingValueLabel, measurementAttributeLabel;
 	private JTextField fromGroupingValueTextField, toGroupingValueTextField;
@@ -57,7 +64,7 @@ public class TransitivePerformanceMinerClusterizationAndFilteringDialog extends 
 	
 	private void initComponents() {
 
-		ScrollableGridLayout rootLayout = new ScrollableGridLayout(this, 2, 3, 0, 0);
+		ScrollableGridLayout rootLayout = new ScrollableGridLayout(this, 2, 5, 0, 0);
 		rootLayout.setRowFixed(0, true);
 		rootLayout.setRowFixed(1, true);
 		this.setLayout(rootLayout);
@@ -71,10 +78,11 @@ public class TransitivePerformanceMinerClusterizationAndFilteringDialog extends 
 		add(clusterizationPanel);
 
 		buildAnomaliesPanel();
-		rootLayout.setPosition(anomaliesPanel, 0, 2);
+		rootLayout.setPosition(anomaliesPanel, 0, 4);
 		add(anomaliesPanel);	
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void buildClusterizationPanel() {
 
 		clusterizationPanel = SlickerFactory.instance().createRoundedPanel();
@@ -87,22 +95,46 @@ public class TransitivePerformanceMinerClusterizationAndFilteringDialog extends 
 		clusterizationPanel.setLayout(clusterizationLayout);
 
 		final List<XAttribute> availableAttributes = log.getGlobalEventAttributes();
+		attributesMapping = availableAttributes.stream().collect(Collectors.toMap(XAttribute::getKey, attr -> attr));
+
+		String defaultGroupingAttribute = null, standardGroupingAttribute = STANDARD_GROUPING_ATTRIBUTE,
+				defaultMeasurementAttribute = null, standardMeasurementAttribute = STANDARD_MEASUREMENT_ATTRIBUTE;
+
+		int defaultGroupingAttributeDist = Integer.MAX_VALUE,
+				defaultMeasurementAttributeDist = Integer.MAX_VALUE;
+		LevenshteinDistance levenDistance = new LevenshteinDistance();
 
 		LOGGER.debug("Available attribute names for the grouping one:");
-		for (XAttribute attr : availableAttributes) {
-			LOGGER.debug(attr.getKey() + ": " + attr);
+		for (Map.Entry<String, XAttribute> entry : attributesMapping.entrySet()) {
+
+			String attrName = entry.getKey();
+			int groupingDist = levenDistance.apply(attrName, standardGroupingAttribute),
+					measurementDist = levenDistance.apply(attrName, standardMeasurementAttribute);
+
+			LOGGER.debug(String.format("%s: %s", attrName, entry.getValue()));
+
+			if (defaultGroupingAttribute == null ||
+					groupingDist < defaultGroupingAttributeDist) {
+
+				defaultGroupingAttribute = attrName;
+				defaultGroupingAttributeDist = groupingDist;
+			}
+			
+			if (defaultMeasurementAttribute == null ||
+					measurementDist < defaultMeasurementAttributeDist) {
+
+				defaultMeasurementAttribute = attrName;
+				defaultMeasurementAttributeDist = measurementDist;
+			}
 		}
 		
 		groupingAttributeLabel = SlickerFactory.instance().createLabel("Grouping attribute:");
 		clusterizationLayout.setPosition(groupingAttributeLabel, 0, 0);
 		clusterizationPanel.add(groupingAttributeLabel);
-		
-		// FIXME unchecked conversion issue
-		groupingAttributeComboBox = SlickerFactory.instance().createComboBox(availableAttributes.toArray());
-		
-		// TODO set XAttribute.getKey() for ComboBox entries
-//		groupingAttributeComboBox.setModel(new DefaultComboBoxModel<XAttribute>(availableAttributes.toArray()));
-		
+
+		groupingAttributeComboBox = SlickerFactory.instance().createComboBox(attributesMapping.keySet()
+				.toArray(new String[attributesMapping.size()]));
+		groupingAttributeComboBox.setSelectedItem(defaultGroupingAttribute);
 		clusterizationLayout.setPosition(groupingAttributeComboBox, 0, 1);
 		clusterizationPanel.add(groupingAttributeComboBox);
 		
@@ -125,10 +157,10 @@ public class TransitivePerformanceMinerClusterizationAndFilteringDialog extends 
 		measurementAttributeLabel = SlickerFactory.instance().createLabel("Measurement attribute:");
 		clusterizationLayout.setPosition(measurementAttributeLabel, 3, 0);
 		clusterizationPanel.add(measurementAttributeLabel);
-		
-		// FIXME unchecked conversion issue
-		measurementAttributeComboBox = SlickerFactory.instance().createComboBox(availableAttributes.toArray());
-//		groupingAttributeComboBox.setModel(new DefaultComboBoxModel<XAttribute>(availableAttributes.toArray()));
+
+		measurementAttributeComboBox = SlickerFactory.instance().createComboBox(attributesMapping.keySet()
+				.toArray(new String[attributesMapping.size()]));
+		measurementAttributeComboBox.setSelectedItem(defaultMeasurementAttribute);
 		clusterizationLayout.setPosition(measurementAttributeComboBox, 3, 1);
 		clusterizationPanel.add(measurementAttributeComboBox);
 	}
@@ -153,13 +185,13 @@ public class TransitivePerformanceMinerClusterizationAndFilteringDialog extends 
 	}
 
 	public void fillSettings() {
-		
-		XAttribute groupingAttr = (XAttribute) groupingAttributeComboBox.getSelectedItem();
+
+		XAttribute groupingAttr = attributesMapping.get(groupingAttributeComboBox.getSelectedItem());
 
 		parameters.setGroupingAttr(groupingAttr);
 		parameters.setFromValue(new XAttributeLiteralImpl(groupingAttr.getKey(), fromGroupingValueTextField.getText()));
 		parameters.setToValue(new XAttributeLiteralImpl(groupingAttr.getKey(), toGroupingValueTextField.getText()));
-		parameters.setMeasurementAttr((XAttributeTimestamp) measurementAttributeComboBox.getSelectedItem());
+		parameters.setMeasurementAttr((XAttributeTimestamp) attributesMapping.get(measurementAttributeComboBox.getSelectedItem()));
 
 		if (enableAnomaliesDetectionCheckBox.isSelected()) {
 			// TODO stuff

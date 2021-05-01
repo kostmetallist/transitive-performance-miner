@@ -32,6 +32,7 @@ public class TransitivePerformanceMinerClassifierDialog extends WizardStep {
 		}
 
 		add(new ClassifierPanel(availableClassifiers, parameters), "0, 0");
+		// TODO set classifier by default
 	}
 	
 	public void fillSettings() {}
