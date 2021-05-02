@@ -1,6 +1,6 @@
 package org.processmining.plugins.tpm.util;
 
-import org.processmining.plugins.tpm.parameters.TransitivePerformanceMinerParameters;
+import org.processmining.plugins.tpm.parameters.Parameters;
 
 public class Pair<T, S> {
 	

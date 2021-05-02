@@ -28,9 +28,9 @@ import org.deckfour.xes.model.XAttributeTimestamp;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 
-import org.processmining.plugins.tpm.parameters.TransitivePerformanceMinerParameters;
+import org.processmining.plugins.tpm.parameters.Parameters;
 
-public class TransitivePerformanceMinerClusterizationAndFilteringDialog extends WizardStep {
+public class ClusterizationAndAnomaliesDialog extends WizardStep {
 
 	private static final long serialVersionUID = -2130094545823451112L;
 	private static final String STANDARD_GROUPING_ATTRIBUTE = "resource";
@@ -39,7 +39,7 @@ public class TransitivePerformanceMinerClusterizationAndFilteringDialog extends 
 	
 	private final XLog log;
 	// FIXME remove final if any problems with persisting values
-	private final TransitivePerformanceMinerParameters parameters;
+	private final Parameters parameters;
 	
 	private Map<String, XAttribute> attributesMapping;
 
@@ -54,8 +54,8 @@ public class TransitivePerformanceMinerClusterizationAndFilteringDialog extends 
 	private JLabel enableAnomaliesDetectionLabel;
 	private JCheckBox enableAnomaliesDetectionCheckBox;
 
-	public TransitivePerformanceMinerClusterizationAndFilteringDialog(XLog log,
-			TransitivePerformanceMinerParameters parameters) {
+	public ClusterizationAndAnomaliesDialog(XLog log,
+			Parameters parameters) {
 
 		this.log = log;
 		this.parameters = parameters;

@@ -13,21 +13,21 @@ import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.Progress;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
-import org.processmining.plugins.tpm.algorithms.TransitivePerformanceMinerAlgorithm;
-import org.processmining.plugins.tpm.connections.TransitivePerformanceMinerConnection;
+import org.processmining.plugins.tpm.algorithms.PerformanceMinerAlgorithm;
+import org.processmining.plugins.tpm.connections.Connection;
 import org.processmining.plugins.tpm.model.MarkedClusterNet;
-import org.processmining.plugins.tpm.parameters.TransitivePerformanceMinerParameters;
-import org.processmining.plugins.tpm.ui.TransitivePerformanceMinerUI;
+import org.processmining.plugins.tpm.parameters.Parameters;
+import org.processmining.plugins.tpm.ui.UI;
 
 @Plugin(name = "Run Transitive Performance Miner",
     parameterLabels = { "Event Log", "Parameters" },
     returnLabels = { "Visualized Marked Cluster Net" },
     returnTypes = { MarkedClusterNet.class },
-    help = TransitivePerformanceMinerHelp.TEXT)
-public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgorithm {
+    help = HelpMessage.TEXT)
+public class MainPlugin extends PerformanceMinerAlgorithm {
 	
 	private MarkedClusterNet runConnection(PluginContext context, XLog log,
-			TransitivePerformanceMinerParameters parameters) {
+			Parameters parameters) {
 
 		Progress progress = context.getProgress();
 		progress.setMaximum(100);
@@ -35,15 +35,15 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
 		progress.setValue(0);
 		progress.setCaption("Setting up connection between plugin artifacts...");
 		if (parameters.isTryConnections()) {
-			Collection<TransitivePerformanceMinerConnection> connections;
+			Collection<Connection> connections;
 			try {
 				connections = context.getConnectionManager().getConnections(
-						TransitivePerformanceMinerConnection.class, context, log);
+						Connection.class, context, log);
 
-				for (TransitivePerformanceMinerConnection connection : connections) {
-					if (connection.getObjectWithRole(TransitivePerformanceMinerConnection.LOG).equals(log)
+				for (Connection connection : connections) {
+					if (connection.getObjectWithRole(Connection.LOG).equals(log)
 							&& connection.getParameters().equals(parameters)) {
-						return connection.getObjectWithRole(TransitivePerformanceMinerConnection.MCN);
+						return connection.getObjectWithRole(Connection.MCN);
 					}
 				}
 			} catch (ConnectionCannotBeObtained e) {}
@@ -55,7 +55,7 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
 
 		if (parameters.isTryConnections()) {
 			context.getConnectionManager().addConnection(
-					new TransitivePerformanceMinerConnection(log, mcn, parameters));
+					new Connection(log, mcn, parameters));
 		}
 
 		progress.setValue(100);
@@ -71,8 +71,8 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
     		final UIPluginContext context,
     		final XLog log) {
 
-		TransitivePerformanceMinerUI ui = new TransitivePerformanceMinerUI(context, log);
-		TransitivePerformanceMinerParameters parameters = ui.gatherParameters();
+		UI ui = new UI(context, log);
+		Parameters parameters = ui.gatherParameters();
 
         return runConnection(context, log, parameters);
     }
@@ -84,7 +84,7 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
     public MarkedClusterNet buildMarkedClusterNet(
     		final PluginContext context,
     		final XLog log,
-    		final TransitivePerformanceMinerParameters parameters) {
+    		final Parameters parameters) {
 
         return runConnection(context, log, parameters);
     }
@@ -112,7 +112,7 @@ public class TransitivePerformanceMiner extends TransitivePerformanceMinerAlgori
     	String toGroup = "Sara";
     	String measurementAttrName = "time:timestamp";
 
-    	TransitivePerformanceMinerParameters parameters = new TransitivePerformanceMinerParameters(
+    	Parameters parameters = new Parameters(
     			log,
     			new XAttributeLiteralImpl(groupingAttrName, new String()),
     			new XAttributeLiteralImpl(groupingAttrName, fromGroup),

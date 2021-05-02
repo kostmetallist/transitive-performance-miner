@@ -9,7 +9,7 @@ import org.processmining.basicutils.parameters.impl.PluginParametersImpl;
 import org.processmining.log.parameters.ClassifierParameter;
 import org.processmining.log.utils.XUtils;
 
-public class TransitivePerformanceMinerParameters extends PluginParametersImpl implements ClassifierParameter {
+public class Parameters extends PluginParametersImpl implements ClassifierParameter {
 
 	private XEventClassifier classifier;
 	private XAttribute groupingAttr;
@@ -18,12 +18,12 @@ public class TransitivePerformanceMinerParameters extends PluginParametersImpl i
 	private XAttributeLiteral toValue;
 	private XAttributeTimestamp measurementAttr;
 
-	public TransitivePerformanceMinerParameters() {
+	public Parameters() {
 		super();
 		setTryConnections(true);
 	}
 
-	public TransitivePerformanceMinerParameters(XLog log, XAttribute groupingAttr,
+	public Parameters(XLog log, XAttribute groupingAttr,
 			XAttributeLiteral fromValue, XAttributeLiteral toValue, XAttributeTimestamp measurementAttr) {
 
 		super();
@@ -36,7 +36,7 @@ public class TransitivePerformanceMinerParameters extends PluginParametersImpl i
 		setMeasurementAttr(measurementAttr);
 	}
 
-	public TransitivePerformanceMinerParameters(TransitivePerformanceMinerParameters parameters) {
+	public Parameters(Parameters parameters) {
 
 		super(parameters);
 		setClassifier(parameters.getClassifier());
@@ -64,8 +64,8 @@ public class TransitivePerformanceMinerParameters extends PluginParametersImpl i
 	}
 
 	public boolean equals(Object object) {
-		if (object instanceof TransitivePerformanceMinerParameters) {
-			TransitivePerformanceMinerParameters parameters = (TransitivePerformanceMinerParameters) object;
+		if (object instanceof Parameters) {
+			Parameters parameters = (Parameters) object;
 			return super.equals(parameters) && getClassifier().equals(parameters.getClassifier());
 		}
 		return false;

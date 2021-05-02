@@ -10,9 +10,9 @@ import org.deckfour.uitopia.api.event.TaskListener.InteractionResult;
 import org.deckfour.xes.model.XLog;
 
 import org.processmining.contexts.uitopia.UIPluginContext;
-import org.processmining.plugins.tpm.parameters.TransitivePerformanceMinerParameters;
+import org.processmining.plugins.tpm.parameters.Parameters;
 
-public class TransitivePerformanceMinerUI {
+public class UI {
 	
 	private enum WizardDirection {
 		PREV,
@@ -21,21 +21,21 @@ public class TransitivePerformanceMinerUI {
 	
 	private static final Logger LOGGER = LogManager.getRootLogger();
 	
-	private TransitivePerformanceMinerParameters parameters;
+	private Parameters parameters;
 	private UIPluginContext context;
 
 	private Map<Integer, WizardStep> wizardSteps;
 	private int wizardStepsNumber;
 	private int currentStep;
 
-	public TransitivePerformanceMinerUI(UIPluginContext context, XLog log) {
+	public UI(UIPluginContext context, XLog log) {
 
-		this.parameters = new TransitivePerformanceMinerParameters();
+		this.parameters = new Parameters();
 		this.context = context;
 
 		this.wizardSteps = new HashMap<>();
-		this.wizardSteps.put(0, new TransitivePerformanceMinerClassifierDialog(log, parameters));
-		this.wizardSteps.put(1, new TransitivePerformanceMinerClusterizationAndFilteringDialog(log, parameters));
+		this.wizardSteps.put(0, new ClassifierDialog(log, parameters));
+		this.wizardSteps.put(1, new ClusterizationAndAnomaliesDialog(log, parameters));
 		this.wizardStepsNumber = wizardSteps.size();
 		this.currentStep = 0;
 	}
@@ -52,7 +52,7 @@ public class TransitivePerformanceMinerUI {
 		return currentStep;
 	}
 	
-	public TransitivePerformanceMinerParameters gatherParameters() {
+	public Parameters gatherParameters() {
 
 		InteractionResult result = InteractionResult.NEXT;
 		

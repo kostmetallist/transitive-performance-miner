@@ -36,11 +36,11 @@ import org.processmining.log.utils.XUtils;
 import org.processmining.plugins.tpm.model.ClusterTransitionIndicator;
 import org.processmining.plugins.tpm.model.MarkedClusterNet;
 import org.processmining.plugins.tpm.model.TraceEntry;
-import org.processmining.plugins.tpm.parameters.TransitivePerformanceMinerParameters;
+import org.processmining.plugins.tpm.parameters.Parameters;
 import org.processmining.plugins.tpm.util.Pair;
 import org.processmining.framework.plugin.PluginContext;
 
-public class TransitivePerformanceMinerAlgorithm {
+public class PerformanceMinerAlgorithm {
 	
 	private static final Logger LOGGER = LogManager.getRootLogger();
 	private static final int SOLVER_TIMEOUT = 100;  // in seconds
@@ -197,7 +197,7 @@ public class TransitivePerformanceMinerAlgorithm {
 	}
 
 	public MarkedClusterNet apply(PluginContext context, XLog log,
-			TransitivePerformanceMinerParameters parameters) {
+			Parameters parameters) {
 
 		XLogInfo logInfo = XLogInfoFactory.createLogInfo(log, parameters.getClassifier());
 		String groupingAttrName = parameters.getGroupingAttr().getKey();
