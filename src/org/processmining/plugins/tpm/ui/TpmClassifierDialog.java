@@ -13,14 +13,24 @@ import org.deckfour.xes.classification.XEventNameClassifier;
 import org.deckfour.xes.model.XLog;
 
 import org.processmining.log.dialogs.ClassifierPanel;
+import org.processmining.log.utils.XUtils;
 import org.processmining.plugins.tpm.parameters.TpmParameters;
 
 public class TpmClassifierDialog extends TpmWizardStep {
 
 	private static final long serialVersionUID = -1060558585823462314L;
+	private final XLog log;
+	private final TpmParameters parameters;
 
 	public TpmClassifierDialog(XLog log, TpmParameters parameters) {
 
+		this.log = log;
+		this.parameters = parameters;
+		initComponents();
+	}
+	
+	protected void initComponents() {
+		
 		double size[][] = { { TableLayoutConstants.FILL }, { TableLayoutConstants.FILL } };
 		setLayout(new TableLayout(size));
 		List<XEventClassifier> availableClassifiers = new ArrayList<XEventClassifier>();
@@ -32,8 +42,12 @@ public class TpmClassifierDialog extends TpmWizardStep {
 		}
 
 		add(new ClassifierPanel(availableClassifiers, parameters), "0, 0");
-		// TODO set classifier by default
 	}
 	
-	public void fillSettings() {}
+	public void fillSettings() {
+		if (parameters.getClassifier() == null) {
+			// TODO set classifier by default
+			parameters.setClassifier(XUtils.getDefaultClassifier(log));
+		}
+	}
 }

@@ -38,7 +38,6 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 	private static final Logger LOGGER = LogManager.getRootLogger(); 
 	
 	private final XLog log;
-	// FIXME remove final if any problems with persisting values
 	private final TpmParameters parameters;
 	
 	private Map<String, XAttribute> attributesMapping;
@@ -62,7 +61,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		initComponents();
 	}
 	
-	private void initComponents() {
+	protected void initComponents() {
 
 		TpmScrollableGridLayout rootLayout = new TpmScrollableGridLayout(this, 2, 5, 0, 0);
 		rootLayout.setRowFixed(0, true);

@@ -63,6 +63,7 @@ public class TpmUI {
 			TpmWizardStep ws = wizardSteps.get(currentStep);
 			result = context.showWizard(String.format("Transitive Performance Miner configuration step %d", currentStep + 1),
 					currentStep == 0, currentStep == wizardStepsNumber - 1, ws);
+			ws.fillSettings();
 			
 			switch (result) {
 
@@ -75,7 +76,6 @@ public class TpmUI {
 				break;
 
 			case FINISHED:
-				ws.fillSettings();
 				LOGGER.info(String.format("parameters.classifier      : %s", parameters.getClassifier()));
 				LOGGER.info(String.format("parameters.groupingAttr    : %s", parameters.getGroupingAttr().getKey()));
 				LOGGER.info(String.format("parameters.fromValue       : %s", parameters.getFromValue()));
