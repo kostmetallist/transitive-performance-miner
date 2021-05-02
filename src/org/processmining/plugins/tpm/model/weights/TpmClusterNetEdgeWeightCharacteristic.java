@@ -2,9 +2,17 @@ package org.processmining.plugins.tpm.model.weights;
 
 public class TpmClusterNetEdgeWeightCharacteristic {
 
-	private double averageThroughputTime;
 	private double minThroughputTime;
+	private double averageThroughputTime;
 	private double maxThroughputTime;
+	
+	public TpmClusterNetEdgeWeightCharacteristic(double minThroughputTime, 
+			double averageThroughputTime, double maxThroughputTime) {
+		
+		this.minThroughputTime = minThroughputTime;
+		this.averageThroughputTime = averageThroughputTime;
+		this.maxThroughputTime = maxThroughputTime;
+	}
 
 	public double getAverageThroughputTime() {
 		return averageThroughputTime;

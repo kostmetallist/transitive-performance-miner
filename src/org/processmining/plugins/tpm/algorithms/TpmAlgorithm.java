@@ -36,6 +36,7 @@ import org.processmining.log.utils.XUtils;
 import org.processmining.plugins.tpm.model.TpmClusterTransitionIndicator;
 import org.processmining.plugins.tpm.model.TpmMarkedClusterNet;
 import org.processmining.plugins.tpm.model.TpmTraceEntry;
+import org.processmining.plugins.tpm.model.weights.TpmClusterNetEdgeWeightCharacteristic;
 import org.processmining.plugins.tpm.parameters.TpmParameters;
 import org.processmining.plugins.tpm.util.TpmPair;
 import org.processmining.framework.plugin.PluginContext;
@@ -293,6 +294,17 @@ public class TpmAlgorithm {
 			LOGGER.debug("  <EMPTY>");
 		}
 
-		return new TpmMarkedClusterNet();
+		TpmMarkedClusterNet mcn = new TpmMarkedClusterNet();
+		mcn.addCluster(parameters.getFromValue().getValue());
+		mcn.addCluster(parameters.getToValue().getValue());
+		
+		TpmClusterNetEdgeWeightCharacteristic wChar = new TpmClusterNetEdgeWeightCharacteristic(
+				estimationsByTraces.values().stream().mapToDouble(x -> x).min().getAsDouble(),
+				estimationsByTraces.values().stream().mapToDouble(x -> x).average().getAsDouble(),
+				estimationsByTraces.values().stream().mapToDouble(x -> x).max().getAsDouble()
+		);
+		mcn.addTransition(parameters.getFromValue().getValue(), parameters.getToValue().getValue(), wChar);
+
+		return mcn;
 	}
 }

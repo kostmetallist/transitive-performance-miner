@@ -2,24 +2,24 @@ package org.processmining.plugins.tpm.model;
 
 import org.processmining.plugins.tpm.model.weights.TpmWeightCharacteristic;
 
-public class TpmClusterTransition {
+public class TpmClusterTransition<T> {
 
-	private TpmEventCluster fromCluster, toCluster;
+	private T fromCluster, toCluster;
 	private TpmWeightCharacteristic weight;
 	
-	public TpmEventCluster getFromCluster() {
+	public T getFromCluster() {
 		return fromCluster;
 	}
 
-	public void setFromCluster(TpmEventCluster fromCluster) {
+	public void setFromCluster(T fromCluster) {
 		this.fromCluster = fromCluster;
 	}
 
-	public TpmEventCluster getToCluster() {
+	public T getToCluster() {
 		return toCluster;
 	}
 
-	public void setToCluster(TpmEventCluster toCluster) {
+	public void setToCluster(T toCluster) {
 		this.toCluster = toCluster;
 	}
 
