@@ -19,11 +19,12 @@ import org.processmining.plugins.tpm.model.TpmMarkedClusterNet;
 import org.processmining.plugins.tpm.parameters.TpmParameters;
 import org.processmining.plugins.tpm.ui.TpmUI;
 
-@Plugin(name = "Run Transitive Performance Miner",
-    parameterLabels = { "Event Log", "Parameters" },
-    returnLabels = { "Visualized Marked Cluster Net" },
-    returnTypes = { TpmMarkedClusterNet.class },
-    help = TpmHelpMessage.TEXT)
+@Plugin(
+		name = "Run Transitive Performance Miner",
+	    parameterLabels = { "Event Log", "Parameters" },
+	    returnLabels = { "Marked Cluster Net" },
+	    returnTypes = { TpmMarkedClusterNet.class },
+	    help = TpmHelpMessage.TEXT)
 public class TpmMainPlugin extends TpmAlgorithm {
 	
 	private TpmMarkedClusterNet runConnection(PluginContext context, XLog log,
@@ -63,7 +64,8 @@ public class TpmMainPlugin extends TpmAlgorithm {
 		return mcn;
 	}
 	
-	@UITopiaVariant(affiliation = "ISPRAS",
+	@UITopiaVariant(
+			affiliation = "ISPRAS",
 	        author = "Konstantin Kukushkin",
 	        email = "kukushkin@ispras.ru")
     @PluginVariant(requiredParameterLabels = { 0 })
@@ -77,7 +79,8 @@ public class TpmMainPlugin extends TpmAlgorithm {
         return runConnection(context, log, parameters);
     }
 
-	@UITopiaVariant(affiliation = "ISPRAS",
+	@UITopiaVariant(
+			affiliation = "ISPRAS",
 	        author = "Konstantin Kukushkin",
 	        email = "kukushkin@ispras.ru")
     @PluginVariant(requiredParameterLabels = { 0, 1 })
@@ -98,7 +101,8 @@ public class TpmMainPlugin extends TpmAlgorithm {
      * @param log
      * 		  An instance of {@code XLog}
      */
-    @UITopiaVariant(affiliation = "ISPRAS",
+    @UITopiaVariant(
+    	affiliation = "ISPRAS",
         author = "Konstantin Kukushkin",
         email = "kukushkin@ispras.ru")
     @PluginVariant(requiredParameterLabels = { 0 })

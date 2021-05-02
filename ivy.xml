@@ -15,7 +15,6 @@
 
     <!-- ProM packages. -->
     <dependency org="prom" name="BasicUtils" rev="latest" changing="true" transitive="true" />
-    <dependency org="prom" name="GraphViz" rev="latest" changing="true" transitive="true" />
     <dependency org="prom" name="Log" rev="latest" changing="true" transitive="true" />
 
     <!--__________________________________________________________________________________-->

@@ -7,6 +7,7 @@ import org.processmining.plugins.tpm.model.weights.TpmClusterNetEdgeWeightCharac
 
 public class TpmMarkedClusterNetEdge extends AbstractDirectedGraphEdge<TpmMarkedClusterNetNode, TpmMarkedClusterNetNode> {
 	
+	// TODO move to TpmMarkedClusterNetElement?
 	private TpmClusterNetEdgeWeightCharacteristic wChar;
 
 	public TpmMarkedClusterNetEdge(TpmMarkedClusterNetNode source, TpmMarkedClusterNetNode target,
