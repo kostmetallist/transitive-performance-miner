@@ -2,26 +2,26 @@ package org.processmining.plugins.tpm.connections;
 
 import org.deckfour.xes.model.XLog;
 import org.processmining.framework.connections.impl.AbstractConnection;
-import org.processmining.plugins.tpm.model.MarkedClusterNet;
-import org.processmining.plugins.tpm.parameters.Parameters;
+import org.processmining.plugins.tpm.model.TpmMarkedClusterNet;
+import org.processmining.plugins.tpm.parameters.TpmParameters;
 
-public class Connection extends AbstractConnection {
+public class TpmConnection extends AbstractConnection {
 
 	public final static String LOG = "Log";
 	public final static String MCN = "MarkedClusterNet";
 
-	private Parameters parameters;
+	private TpmParameters parameters;
 
-	public Connection(XLog log, MarkedClusterNet mcn,
-			Parameters parameters) {
+	public TpmConnection(XLog log, TpmMarkedClusterNet mcn,
+			TpmParameters parameters) {
 
 		super("Construct Marked Cluster Net from Event Log Connection");
 		put(LOG, log);
 		put(MCN, mcn);
-		this.parameters = new Parameters(parameters);
+		this.parameters = new TpmParameters(parameters);
 	}
 
-	public Parameters getParameters() {
+	public TpmParameters getParameters() {
 		return parameters;
 	}
 }

@@ -2,22 +2,22 @@ package org.processmining.plugins.tpm.visual;
 
 import org.processmining.plugins.graphviz.dot.Dot;
 import org.processmining.plugins.graphviz.dot.DotNode;
-import org.processmining.plugins.tpm.model.EventCluster;
-import org.processmining.plugins.tpm.model.MarkedClusterNet;
-import org.processmining.plugins.tpm.util.Pair;
+import org.processmining.plugins.tpm.model.TpmEventCluster;
+import org.processmining.plugins.tpm.model.TpmMarkedClusterNet;
+import org.processmining.plugins.tpm.util.TpmPair;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 
-public class MarkedClusterNetInterpreter {
+public class TpmMarkedClusterNetInterpreter {
 
-	public static Pair<Dot, TIntObjectMap<DotNode>> visualize(MarkedClusterNet mcn) {
+	public static TpmPair<Dot, TIntObjectMap<DotNode>> visualize(TpmMarkedClusterNet mcn) {
 
 		Dot result = new Dot();
 		TIntObjectMap<DotNode> activity2dotNode = new TIntObjectHashMap<>(10, 0.5f, -1);
 
-		for (EventCluster cluster : mcn.getClusters()) {
+		for (TpmEventCluster cluster : mcn.getClusters()) {
 
 			DotNode node = result.addNode(cluster.getLabel());
 			// activity2dotNode.put(clusterIndex, node);
@@ -34,6 +34,6 @@ public class MarkedClusterNetInterpreter {
 //		}
 
 
-		return new Pair<Dot, TIntObjectMap<DotNode>>(result, activity2dotNode);
+		return new TpmPair<Dot, TIntObjectMap<DotNode>>(result, activity2dotNode);
 	}
 }

@@ -1,27 +1,27 @@
 package org.processmining.plugins.tpm.model;
 
-import org.processmining.plugins.tpm.model.weights.SimpleWeightCharacteristic;
+import org.processmining.plugins.tpm.model.weights.TpmSimpleWeightCharacteristic;
 
-public class ClusterTransitionIndicator {
+public class TpmClusterTransitionIndicator {
 
 	private int fromClusterNodeIndex;
 	private int toClusterNodeIndex;
-	private SimpleWeightCharacteristic simpleWeightChar;
+	private TpmSimpleWeightCharacteristic simpleWeightChar;
 		
-	public ClusterTransitionIndicator(int fromClusterNodeIndex, int toClusterNodeIndex,
-			SimpleWeightCharacteristic simpleWeightChar) {
+	public TpmClusterTransitionIndicator(int fromClusterNodeIndex, int toClusterNodeIndex,
+			TpmSimpleWeightCharacteristic simpleWeightChar) {
 
 		this.fromClusterNodeIndex = fromClusterNodeIndex;
 		this.toClusterNodeIndex = toClusterNodeIndex;
 		this.simpleWeightChar = simpleWeightChar;
 	}
 	
-	public ClusterTransitionIndicator(int fromClusterNodeIndex, int toClusterNodeIndex,
+	public TpmClusterTransitionIndicator(int fromClusterNodeIndex, int toClusterNodeIndex,
 			double simpleWeightCharacteristicValue) {
 
 		this.fromClusterNodeIndex = fromClusterNodeIndex;
 		this.toClusterNodeIndex = toClusterNodeIndex;
-		this.simpleWeightChar = new SimpleWeightCharacteristic(simpleWeightCharacteristicValue);
+		this.simpleWeightChar = new TpmSimpleWeightCharacteristic(simpleWeightCharacteristicValue);
 	}
 
 	public int getFromClusterNodeIndex() {
@@ -40,11 +40,11 @@ public class ClusterTransitionIndicator {
 		this.toClusterNodeIndex = toClusterNodeIndex;
 	}
 
-	public SimpleWeightCharacteristic getSimpleWeightChar() {
+	public TpmSimpleWeightCharacteristic getSimpleWeightChar() {
 		return simpleWeightChar;
 	}
 
-	public void setSimpleWeightChar(SimpleWeightCharacteristic simpleWeightChar) {
+	public void setSimpleWeightChar(TpmSimpleWeightCharacteristic simpleWeightChar) {
 		this.simpleWeightChar = simpleWeightChar;
 	}
 	

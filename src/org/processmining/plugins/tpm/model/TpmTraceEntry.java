@@ -3,14 +3,14 @@ package org.processmining.plugins.tpm.model;
 import org.deckfour.xes.model.XAttribute;
 import org.deckfour.xes.model.XEvent;
 
-public class TraceEntry {
+public class TpmTraceEntry {
 	
 	private static String COMMON_EVENT_ATTRIBUTE_NAME = "concept:name";
 	private XEvent event;
 	private XAttribute groupId;
 	private int index;
 
-	public TraceEntry(XEvent event, XAttribute groupId, int index) {
+	public TpmTraceEntry(XEvent event, XAttribute groupId, int index) {
 		this.event = event;
 		this.groupId = groupId;
 		this.index = index;

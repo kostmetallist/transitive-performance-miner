@@ -9,7 +9,7 @@ import org.processmining.basicutils.parameters.impl.PluginParametersImpl;
 import org.processmining.log.parameters.ClassifierParameter;
 import org.processmining.log.utils.XUtils;
 
-public class Parameters extends PluginParametersImpl implements ClassifierParameter {
+public class TpmParameters extends PluginParametersImpl implements ClassifierParameter {
 
 	private XEventClassifier classifier;
 	private XAttribute groupingAttr;
@@ -18,12 +18,12 @@ public class Parameters extends PluginParametersImpl implements ClassifierParame
 	private XAttributeLiteral toValue;
 	private XAttributeTimestamp measurementAttr;
 
-	public Parameters() {
+	public TpmParameters() {
 		super();
 		setTryConnections(true);
 	}
 
-	public Parameters(XLog log, XAttribute groupingAttr,
+	public TpmParameters(XLog log, XAttribute groupingAttr,
 			XAttributeLiteral fromValue, XAttributeLiteral toValue, XAttributeTimestamp measurementAttr) {
 
 		super();
@@ -36,7 +36,7 @@ public class Parameters extends PluginParametersImpl implements ClassifierParame
 		setMeasurementAttr(measurementAttr);
 	}
 
-	public Parameters(Parameters parameters) {
+	public TpmParameters(TpmParameters parameters) {
 
 		super(parameters);
 		setClassifier(parameters.getClassifier());
@@ -64,8 +64,8 @@ public class Parameters extends PluginParametersImpl implements ClassifierParame
 	}
 
 	public boolean equals(Object object) {
-		if (object instanceof Parameters) {
-			Parameters parameters = (Parameters) object;
+		if (object instanceof TpmParameters) {
+			TpmParameters parameters = (TpmParameters) object;
 			return super.equals(parameters) && getClassifier().equals(parameters.getClassifier());
 		}
 		return false;

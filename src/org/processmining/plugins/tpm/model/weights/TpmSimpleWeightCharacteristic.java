@@ -1,10 +1,10 @@
 package org.processmining.plugins.tpm.model.weights;
 
-public class SimpleWeightCharacteristic {
+public class TpmSimpleWeightCharacteristic {
 
 	private double value;
 	
-	public SimpleWeightCharacteristic(double value) {
+	public TpmSimpleWeightCharacteristic(double value) {
 		this.value = value;
 	}
 

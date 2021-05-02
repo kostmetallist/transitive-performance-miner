@@ -13,13 +13,13 @@ import org.deckfour.xes.classification.XEventNameClassifier;
 import org.deckfour.xes.model.XLog;
 
 import org.processmining.log.dialogs.ClassifierPanel;
-import org.processmining.plugins.tpm.parameters.Parameters;
+import org.processmining.plugins.tpm.parameters.TpmParameters;
 
-public class ClassifierDialog extends WizardStep {
+public class TpmClassifierDialog extends TpmWizardStep {
 
 	private static final long serialVersionUID = -1060558585823462314L;
 
-	public ClassifierDialog(XLog log, Parameters parameters) {
+	public TpmClassifierDialog(XLog log, TpmParameters parameters) {
 
 		double size[][] = { { TableLayoutConstants.FILL }, { TableLayoutConstants.FILL } };
 		setLayout(new TableLayout(size));

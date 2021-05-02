@@ -33,14 +33,14 @@ import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 
 import org.processmining.log.utils.XUtils;
-import org.processmining.plugins.tpm.model.ClusterTransitionIndicator;
-import org.processmining.plugins.tpm.model.MarkedClusterNet;
-import org.processmining.plugins.tpm.model.TraceEntry;
-import org.processmining.plugins.tpm.parameters.Parameters;
-import org.processmining.plugins.tpm.util.Pair;
+import org.processmining.plugins.tpm.model.TpmClusterTransitionIndicator;
+import org.processmining.plugins.tpm.model.TpmMarkedClusterNet;
+import org.processmining.plugins.tpm.model.TpmTraceEntry;
+import org.processmining.plugins.tpm.parameters.TpmParameters;
+import org.processmining.plugins.tpm.util.TpmPair;
 import org.processmining.framework.plugin.PluginContext;
 
-public class PerformanceMinerAlgorithm {
+public class TpmAlgorithm {
 	
 	private static final Logger LOGGER = LogManager.getRootLogger();
 	private static final int SOLVER_TIMEOUT = 100;  // in seconds
@@ -66,13 +66,13 @@ public class PerformanceMinerAlgorithm {
 		return toTs - fromTs;
 	}
 	
-	private Pair<Map<Integer, List<ClusterTransitionIndicator>>, Map<Integer, List<ClusterTransitionIndicator>>> getOutgoingIngoingMapping(
-			List<ClusterTransitionIndicator> indicators) {
+	private TpmPair<Map<Integer, List<TpmClusterTransitionIndicator>>, Map<Integer, List<TpmClusterTransitionIndicator>>> getOutgoingIngoingMapping(
+			List<TpmClusterTransitionIndicator> indicators) {
 		
-		Map<Integer, List<ClusterTransitionIndicator>> outgoing = new HashMap<>();
-		Map<Integer, List<ClusterTransitionIndicator>> ingoing = new HashMap<>();
+		Map<Integer, List<TpmClusterTransitionIndicator>> outgoing = new HashMap<>();
+		Map<Integer, List<TpmClusterTransitionIndicator>> ingoing = new HashMap<>();
 		
-		for (ClusterTransitionIndicator cti : indicators) {
+		for (TpmClusterTransitionIndicator cti : indicators) {
 			
 			int i = cti.getFromClusterNodeIndex();
 			int j = cti.getToClusterNodeIndex();
@@ -80,7 +80,7 @@ public class PerformanceMinerAlgorithm {
 			if (outgoing.containsKey(i)) {
 				outgoing.get(i).add(cti);
 			} else {
-				List<ClusterTransitionIndicator> content = new ArrayList<>();
+				List<TpmClusterTransitionIndicator> content = new ArrayList<>();
 				content.add(cti);
 				outgoing.put(i, content);
 			}
@@ -88,7 +88,7 @@ public class PerformanceMinerAlgorithm {
 			if (ingoing.containsKey(j)) {
 				ingoing.get(j).add(cti);
 			} else {
-				List<ClusterTransitionIndicator> content = new ArrayList<>();
+				List<TpmClusterTransitionIndicator> content = new ArrayList<>();
 				content.add(cti);
 				ingoing.put(j, content);
 			}
@@ -98,7 +98,7 @@ public class PerformanceMinerAlgorithm {
 		for (int nodeIndex : outgoing.keySet()) {
 
 			LOGGER.debug(String.format("  From %d:", nodeIndex));
-			for (ClusterTransitionIndicator cti : outgoing.get(nodeIndex)) {
+			for (TpmClusterTransitionIndicator cti : outgoing.get(nodeIndex)) {
 
 				LOGGER.debug(String.format("    %s:", cti));
 			}
@@ -108,18 +108,18 @@ public class PerformanceMinerAlgorithm {
 		for (int nodeIndex : ingoing.keySet()) {
 
 			LOGGER.debug(String.format("  To %d:", nodeIndex));
-			for (ClusterTransitionIndicator cti : ingoing.get(nodeIndex)) {
+			for (TpmClusterTransitionIndicator cti : ingoing.get(nodeIndex)) {
 
 				LOGGER.debug(String.format("    %s:", cti));
 			}
 		}
 
-		return new Pair<>(outgoing, ingoing);
+		return new TpmPair<>(outgoing, ingoing);
 	}
 	
-	private List<ClusterTransitionIndicator> selectOptimalTransitions(List<ClusterTransitionIndicator> initialIndicators) {
+	private List<TpmClusterTransitionIndicator> selectOptimalTransitions(List<TpmClusterTransitionIndicator> initialIndicators) {
 
-		List<ClusterTransitionIndicator> filteredIndicators = new ArrayList<>();
+		List<TpmClusterTransitionIndicator> filteredIndicators = new ArrayList<>();
 		
 		SolverFactory factory = new SolverFactoryLpSolve();
 		factory.setParameter(Solver.VERBOSE, 0);
@@ -128,30 +128,30 @@ public class PerformanceMinerAlgorithm {
 		Linear target = new Linear();
 		Problem problem = new Problem();
 
-		for (ClusterTransitionIndicator cti : initialIndicators) {
+		for (TpmClusterTransitionIndicator cti : initialIndicators) {
 			target.add(cti.getSimpleWeightChar().getValue(), cti);
 			problem.setVarType(cti, Boolean.class);
 		}
 
 		problem.setObjective(target, OptType.MAX);
 
-		Pair<Map<Integer, List<ClusterTransitionIndicator>>, Map<Integer, List<ClusterTransitionIndicator>>> outgoingAndIngoing =
+		TpmPair<Map<Integer, List<TpmClusterTransitionIndicator>>, Map<Integer, List<TpmClusterTransitionIndicator>>> outgoingAndIngoing =
 				getOutgoingIngoingMapping(initialIndicators);
 
-		for (Map.Entry<Integer, List<ClusterTransitionIndicator>> outgoingEntry : outgoingAndIngoing.get_1().entrySet()) {
+		for (Map.Entry<Integer, List<TpmClusterTransitionIndicator>> outgoingEntry : outgoingAndIngoing.get_1().entrySet()) {
 
 			Linear constraint = new Linear();
-			for (ClusterTransitionIndicator cti : outgoingEntry.getValue()) {
+			for (TpmClusterTransitionIndicator cti : outgoingEntry.getValue()) {
 				constraint.add(1, cti);
 			}
 
 			problem.add(constraint, "<=", 1);
 		}
 		
-		for (Map.Entry<Integer, List<ClusterTransitionIndicator>> ingoingEntry : outgoingAndIngoing.get_2().entrySet()) {
+		for (Map.Entry<Integer, List<TpmClusterTransitionIndicator>> ingoingEntry : outgoingAndIngoing.get_2().entrySet()) {
 
 			Linear constraint = new Linear();
-			for (ClusterTransitionIndicator cti : ingoingEntry.getValue()) {
+			for (TpmClusterTransitionIndicator cti : ingoingEntry.getValue()) {
 				constraint.add(1, cti);
 			}
 
@@ -163,7 +163,7 @@ public class PerformanceMinerAlgorithm {
 		Result result = solver.solve(problem);
 		LOGGER.debug("Solver result: " + result);
 		
-		for (ClusterTransitionIndicator cti : initialIndicators) {
+		for (TpmClusterTransitionIndicator cti : initialIndicators) {
 			if (result.getPrimalValue(cti).intValue() == 1) {
 				filteredIndicators.add(cti);
 			}
@@ -172,23 +172,23 @@ public class PerformanceMinerAlgorithm {
 		return filteredIndicators;
 	}
 	
-	private List<ClusterTransitionIndicator> gatherTransitionIndicators(List<TraceEntry> traceSliceEntries,
+	private List<TpmClusterTransitionIndicator> gatherTransitionIndicators(List<TpmTraceEntry> traceSliceEntries,
 			XAttribute attrFrom, XAttribute attrTo) {
 		
-		List<ClusterTransitionIndicator> indicators = new ArrayList<>();
-		Set<TraceEntry> previousFromClusterEntries = new HashSet<>();
+		List<TpmClusterTransitionIndicator> indicators = new ArrayList<>();
+		Set<TpmTraceEntry> previousFromClusterEntries = new HashSet<>();
 
-		for (TraceEntry entry : traceSliceEntries) {
+		for (TpmTraceEntry entry : traceSliceEntries) {
 			if (entry.getGroupId().equals(attrFrom)) {
 				previousFromClusterEntries.add(entry);
 
 			} else if (entry.getGroupId().equals(attrTo)) {
 				
 				int j = entry.getIndex();
-				for (TraceEntry previous : previousFromClusterEntries) {
+				for (TpmTraceEntry previous : previousFromClusterEntries) {
 					
 					int i = previous.getIndex();
-					indicators.add(new ClusterTransitionIndicator(i, j, calculateWeightForIJ(i, j)));
+					indicators.add(new TpmClusterTransitionIndicator(i, j, calculateWeightForIJ(i, j)));
 				}
 			}
 		}
@@ -196,8 +196,8 @@ public class PerformanceMinerAlgorithm {
 		return indicators;
 	}
 
-	public MarkedClusterNet apply(PluginContext context, XLog log,
-			Parameters parameters) {
+	public TpmMarkedClusterNet apply(PluginContext context, XLog log,
+			TpmParameters parameters) {
 
 		XLogInfo logInfo = XLogInfoFactory.createLogInfo(log, parameters.getClassifier());
 		String groupingAttrName = parameters.getGroupingAttr().getKey();
@@ -207,14 +207,14 @@ public class PerformanceMinerAlgorithm {
 		
 		// TODO print out relative frequency of tracked attribute @code{groupingAttrName}
 
-		Map<String, List<TraceEntry>> tracesWithMatchedEvents = new HashMap<>();
+		Map<String, List<TpmTraceEntry>> tracesWithMatchedEvents = new HashMap<>();
 		Map<Integer, Integer> globalToLocalIndices = new HashMap<>();
 		ProgressBarBuilder pbb = new ProgressBarBuilder();
 		pbb.setStyle(ProgressBarStyle.ASCII);
 
 		for (XTrace trace : ProgressBar.wrap(log, pbb)) {
 
-			List<TraceEntry> matchedEventsWithPositions = new ArrayList<>();
+			List<TpmTraceEntry> matchedEventsWithPositions = new ArrayList<>();
 			// TODO replace with XUtils.getConceptName?
 			tracesWithMatchedEvents.put(trace.getAttributes().get(TRACE_NAME_ATTR).toString(), matchedEventsWithPositions);
 
@@ -227,7 +227,7 @@ public class PerformanceMinerAlgorithm {
 						(eventAttributes.get(groupingAttrName).equals(parameters.getFromValue()) ||
 						 eventAttributes.get(groupingAttrName).equals(parameters.getToValue()))) {
 
-					matchedEventsWithPositions.add(new TraceEntry(event, eventAttributes.get(groupingAttrName), i));
+					matchedEventsWithPositions.add(new TpmTraceEntry(event, eventAttributes.get(groupingAttrName), i));
 					globalToLocalIndices.put(i, j++);
 				}
 			}
@@ -236,10 +236,10 @@ public class PerformanceMinerAlgorithm {
 		if (LOGGER.getLevel().isLessSpecificThan(Level.DEBUG)) {
 
 			LOGGER.debug("Dumping collected events:");
-			for (Map.Entry<String, List<TraceEntry>> entry : tracesWithMatchedEvents.entrySet()) {
+			for (Map.Entry<String, List<TpmTraceEntry>> entry : tracesWithMatchedEvents.entrySet()) {
 
 				LOGGER.debug(String.format("For trace %s", entry.getKey()));
-				for (TraceEntry traceEntry : entry.getValue()) {
+				for (TpmTraceEntry traceEntry : entry.getValue()) {
 					LOGGER.debug(String.format("  %s", traceEntry));
 				}
 			}
@@ -248,18 +248,18 @@ public class PerformanceMinerAlgorithm {
 		Map<String, Double> estimationsByTraces = new HashMap<>();
 		
 		LOGGER.info("Starting gathering and filtering transition indicators...");
-		for (Map.Entry<String, List<TraceEntry>> entry : ProgressBar.wrap(tracesWithMatchedEvents.entrySet(), pbb)) {
+		for (Map.Entry<String, List<TpmTraceEntry>> entry : ProgressBar.wrap(tracesWithMatchedEvents.entrySet(), pbb)) {
 
 			LOGGER.debug(String.format("Processing trace %s", entry.getKey()));
 
-			List<TraceEntry> traceEntries = entry.getValue();
-			List<ClusterTransitionIndicator> initial = gatherTransitionIndicators(
+			List<TpmTraceEntry> traceEntries = entry.getValue();
+			List<TpmClusterTransitionIndicator> initial = gatherTransitionIndicators(
 					traceEntries, parameters.getFromValue(), parameters.getToValue());
-			List<ClusterTransitionIndicator> filtered = selectOptimalTransitions(initial);
+			List<TpmClusterTransitionIndicator> filtered = selectOptimalTransitions(initial);
 
 			LOGGER.debug("  Initial:");
 			if (!initial.isEmpty()) {
-				for (ClusterTransitionIndicator cti : initial) {
+				for (TpmClusterTransitionIndicator cti : initial) {
 					LOGGER.debug(String.format("    %s", cti.toString()));
 				}
 			} else {
@@ -268,14 +268,14 @@ public class PerformanceMinerAlgorithm {
 			
 			LOGGER.debug("  Filtered:");
 			if (!filtered.isEmpty()) {
-				for (ClusterTransitionIndicator cti : filtered) {
+				for (TpmClusterTransitionIndicator cti : filtered) {
 					LOGGER.debug(String.format("    %s", cti.toString()));
 				}
 			} else {
 				LOGGER.debug("    <EMPTY>");
 			}
 
-			for (ClusterTransitionIndicator cti : filtered) {
+			for (TpmClusterTransitionIndicator cti : filtered) {
 
 				estimationsByTraces.put(entry.getKey(), calculateSliceMeasurement(
 						traceEntries.get(globalToLocalIndices.get(cti.getFromClusterNodeIndex())).getEvent(),
@@ -293,6 +293,6 @@ public class PerformanceMinerAlgorithm {
 			LOGGER.debug("  <EMPTY>");
 		}
 
-		return new MarkedClusterNet();
+		return new TpmMarkedClusterNet();
 	}
 }

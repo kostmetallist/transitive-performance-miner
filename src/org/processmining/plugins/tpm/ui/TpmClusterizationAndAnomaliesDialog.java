@@ -28,9 +28,9 @@ import org.deckfour.xes.model.XAttributeTimestamp;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 
-import org.processmining.plugins.tpm.parameters.Parameters;
+import org.processmining.plugins.tpm.parameters.TpmParameters;
 
-public class ClusterizationAndAnomaliesDialog extends WizardStep {
+public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 
 	private static final long serialVersionUID = -2130094545823451112L;
 	private static final String STANDARD_GROUPING_ATTRIBUTE = "resource";
@@ -39,7 +39,7 @@ public class ClusterizationAndAnomaliesDialog extends WizardStep {
 	
 	private final XLog log;
 	// FIXME remove final if any problems with persisting values
-	private final Parameters parameters;
+	private final TpmParameters parameters;
 	
 	private Map<String, XAttribute> attributesMapping;
 
@@ -54,8 +54,8 @@ public class ClusterizationAndAnomaliesDialog extends WizardStep {
 	private JLabel enableAnomaliesDetectionLabel;
 	private JCheckBox enableAnomaliesDetectionCheckBox;
 
-	public ClusterizationAndAnomaliesDialog(XLog log,
-			Parameters parameters) {
+	public TpmClusterizationAndAnomaliesDialog(XLog log,
+			TpmParameters parameters) {
 
 		this.log = log;
 		this.parameters = parameters;
@@ -64,7 +64,7 @@ public class ClusterizationAndAnomaliesDialog extends WizardStep {
 	
 	private void initComponents() {
 
-		ScrollableGridLayout rootLayout = new ScrollableGridLayout(this, 2, 5, 0, 0);
+		TpmScrollableGridLayout rootLayout = new TpmScrollableGridLayout(this, 2, 5, 0, 0);
 		rootLayout.setRowFixed(0, true);
 		rootLayout.setRowFixed(1, true);
 		this.setLayout(rootLayout);
@@ -88,7 +88,7 @@ public class ClusterizationAndAnomaliesDialog extends WizardStep {
 		clusterizationPanel = SlickerFactory.instance().createRoundedPanel();
 		clusterizationPanel.setBorder(BorderFactory.createTitledBorder("Configure Main Algorithm Parameters"));
 
-		ScrollableGridLayout clusterizationLayout = new ScrollableGridLayout(clusterizationPanel, 4, 2, 0, 0);
+		TpmScrollableGridLayout clusterizationLayout = new TpmScrollableGridLayout(clusterizationPanel, 4, 2, 0, 0);
 		clusterizationLayout.setRowFixed(0, true);
 		clusterizationLayout.setRowFixed(1, true);
 
@@ -170,7 +170,7 @@ public class ClusterizationAndAnomaliesDialog extends WizardStep {
 		anomaliesPanel = SlickerFactory.instance().createRoundedPanel();
 		anomaliesPanel.setBorder(BorderFactory.createTitledBorder("Define Anomalies Detection Options"));
 	
-		ScrollableGridLayout anomaliesLayout = new ScrollableGridLayout(anomaliesPanel, 4, 2, 0, 0);
+		TpmScrollableGridLayout anomaliesLayout = new TpmScrollableGridLayout(anomaliesPanel, 4, 2, 0, 0);
 		anomaliesLayout.setRowFixed(0, true);
 		anomaliesLayout.setRowFixed(1, true);
 		anomaliesPanel.setLayout(anomaliesLayout);

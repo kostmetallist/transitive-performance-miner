@@ -20,7 +20,7 @@ import javax.swing.SizeRequirements;
  * @version 0.1
  * @date 18 December 2009
  */
-public class ScrollableGridLayout implements LayoutManager2 {
+public class TpmScrollableGridLayout implements LayoutManager2 {
     // gap between rows, columns
     private int horizontalGap, verticalGap;
     // number of rows, columns
@@ -36,7 +36,7 @@ public class ScrollableGridLayout implements LayoutManager2 {
     private SizeRequirements xTotal, yTotal;
 
     // constructor
-    public ScrollableGridLayout(Container target,
+    public TpmScrollableGridLayout(Container target,
         int width, int height, 
         int hgap, int vgap) {
         this.target = target;

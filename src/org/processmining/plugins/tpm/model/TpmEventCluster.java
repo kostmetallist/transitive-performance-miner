@@ -4,13 +4,13 @@ import java.util.HashSet;
 import java.util.Set;
 import org.deckfour.xes.model.XEvent;
 
-public class EventCluster {
+public class TpmEventCluster {
 	private Set<XEvent> items;
 	private String label;
 	
-	public EventCluster() {}
+	public TpmEventCluster() {}
 
-	public EventCluster(Set<XEvent> items, String label) {
+	public TpmEventCluster(Set<XEvent> items, String label) {
 		this.items = new HashSet<XEvent>(items);
 		this.label = label;
 	}

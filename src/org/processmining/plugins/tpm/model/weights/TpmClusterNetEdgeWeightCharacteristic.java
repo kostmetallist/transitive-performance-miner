@@ -1,6 +1,6 @@
 package org.processmining.plugins.tpm.model.weights;
 
-public class ClusterNetEdgeWeightCharacteristic {
+public class TpmClusterNetEdgeWeightCharacteristic {
 
 	private double averageThroughputTime;
 	private double minThroughputTime;

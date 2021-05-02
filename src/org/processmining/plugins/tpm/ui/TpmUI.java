@@ -10,9 +10,9 @@ import org.deckfour.uitopia.api.event.TaskListener.InteractionResult;
 import org.deckfour.xes.model.XLog;
 
 import org.processmining.contexts.uitopia.UIPluginContext;
-import org.processmining.plugins.tpm.parameters.Parameters;
+import org.processmining.plugins.tpm.parameters.TpmParameters;
 
-public class UI {
+public class TpmUI {
 	
 	private enum WizardDirection {
 		PREV,
@@ -21,21 +21,21 @@ public class UI {
 	
 	private static final Logger LOGGER = LogManager.getRootLogger();
 	
-	private Parameters parameters;
+	private TpmParameters parameters;
 	private UIPluginContext context;
 
-	private Map<Integer, WizardStep> wizardSteps;
+	private Map<Integer, TpmWizardStep> wizardSteps;
 	private int wizardStepsNumber;
 	private int currentStep;
 
-	public UI(UIPluginContext context, XLog log) {
+	public TpmUI(UIPluginContext context, XLog log) {
 
-		this.parameters = new Parameters();
+		this.parameters = new TpmParameters();
 		this.context = context;
 
 		this.wizardSteps = new HashMap<>();
-		this.wizardSteps.put(0, new ClassifierDialog(log, parameters));
-		this.wizardSteps.put(1, new ClusterizationAndAnomaliesDialog(log, parameters));
+		this.wizardSteps.put(0, new TpmClassifierDialog(log, parameters));
+		this.wizardSteps.put(1, new TpmClusterizationAndAnomaliesDialog(log, parameters));
 		this.wizardStepsNumber = wizardSteps.size();
 		this.currentStep = 0;
 	}
@@ -52,7 +52,7 @@ public class UI {
 		return currentStep;
 	}
 	
-	public Parameters gatherParameters() {
+	public TpmParameters gatherParameters() {
 
 		InteractionResult result = InteractionResult.NEXT;
 		
@@ -60,7 +60,7 @@ public class UI {
 
 			LOGGER.debug(String.format("Current wizard step: %d", currentStep));
 
-			WizardStep ws = wizardSteps.get(currentStep);
+			TpmWizardStep ws = wizardSteps.get(currentStep);
 			result = context.showWizard(String.format("Transitive Performance Miner configuration step %d", currentStep + 1),
 					currentStep == 0, currentStep == wizardStepsNumber - 1, ws);
 			

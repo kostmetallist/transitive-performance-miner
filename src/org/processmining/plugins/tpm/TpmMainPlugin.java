@@ -13,21 +13,21 @@ import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.Progress;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
-import org.processmining.plugins.tpm.algorithms.PerformanceMinerAlgorithm;
-import org.processmining.plugins.tpm.connections.Connection;
-import org.processmining.plugins.tpm.model.MarkedClusterNet;
-import org.processmining.plugins.tpm.parameters.Parameters;
-import org.processmining.plugins.tpm.ui.UI;
+import org.processmining.plugins.tpm.algorithms.TpmAlgorithm;
+import org.processmining.plugins.tpm.connections.TpmConnection;
+import org.processmining.plugins.tpm.model.TpmMarkedClusterNet;
+import org.processmining.plugins.tpm.parameters.TpmParameters;
+import org.processmining.plugins.tpm.ui.TpmUI;
 
 @Plugin(name = "Run Transitive Performance Miner",
     parameterLabels = { "Event Log", "Parameters" },
     returnLabels = { "Visualized Marked Cluster Net" },
-    returnTypes = { MarkedClusterNet.class },
-    help = HelpMessage.TEXT)
-public class MainPlugin extends PerformanceMinerAlgorithm {
+    returnTypes = { TpmMarkedClusterNet.class },
+    help = TpmHelpMessage.TEXT)
+public class TpmMainPlugin extends TpmAlgorithm {
 	
-	private MarkedClusterNet runConnection(PluginContext context, XLog log,
-			Parameters parameters) {
+	private TpmMarkedClusterNet runConnection(PluginContext context, XLog log,
+			TpmParameters parameters) {
 
 		Progress progress = context.getProgress();
 		progress.setMaximum(100);
@@ -35,15 +35,15 @@ public class MainPlugin extends PerformanceMinerAlgorithm {
 		progress.setValue(0);
 		progress.setCaption("Setting up connection between plugin artifacts...");
 		if (parameters.isTryConnections()) {
-			Collection<Connection> connections;
+			Collection<TpmConnection> connections;
 			try {
 				connections = context.getConnectionManager().getConnections(
-						Connection.class, context, log);
+						TpmConnection.class, context, log);
 
-				for (Connection connection : connections) {
-					if (connection.getObjectWithRole(Connection.LOG).equals(log)
+				for (TpmConnection connection : connections) {
+					if (connection.getObjectWithRole(TpmConnection.LOG).equals(log)
 							&& connection.getParameters().equals(parameters)) {
-						return connection.getObjectWithRole(Connection.MCN);
+						return connection.getObjectWithRole(TpmConnection.MCN);
 					}
 				}
 			} catch (ConnectionCannotBeObtained e) {}
@@ -51,11 +51,11 @@ public class MainPlugin extends PerformanceMinerAlgorithm {
 
 		progress.setValue(20);
 		progress.setCaption("Performing event log processing...");
-		MarkedClusterNet mcn = this.apply(context, log, parameters);
+		TpmMarkedClusterNet mcn = this.apply(context, log, parameters);
 
 		if (parameters.isTryConnections()) {
 			context.getConnectionManager().addConnection(
-					new Connection(log, mcn, parameters));
+					new TpmConnection(log, mcn, parameters));
 		}
 
 		progress.setValue(100);
@@ -67,12 +67,12 @@ public class MainPlugin extends PerformanceMinerAlgorithm {
 	        author = "Konstantin Kukushkin",
 	        email = "kukushkin@ispras.ru")
     @PluginVariant(requiredParameterLabels = { 0 })
-    public MarkedClusterNet buildMarkedClusterNetUI(
+    public TpmMarkedClusterNet buildMarkedClusterNetUI(
     		final UIPluginContext context,
     		final XLog log) {
 
-		UI ui = new UI(context, log);
-		Parameters parameters = ui.gatherParameters();
+		TpmUI ui = new TpmUI(context, log);
+		TpmParameters parameters = ui.gatherParameters();
 
         return runConnection(context, log, parameters);
     }
@@ -81,10 +81,10 @@ public class MainPlugin extends PerformanceMinerAlgorithm {
 	        author = "Konstantin Kukushkin",
 	        email = "kukushkin@ispras.ru")
     @PluginVariant(requiredParameterLabels = { 0, 1 })
-    public MarkedClusterNet buildMarkedClusterNet(
+    public TpmMarkedClusterNet buildMarkedClusterNet(
     		final PluginContext context,
     		final XLog log,
-    		final Parameters parameters) {
+    		final TpmParameters parameters) {
 
         return runConnection(context, log, parameters);
     }
@@ -102,7 +102,7 @@ public class MainPlugin extends PerformanceMinerAlgorithm {
         author = "Konstantin Kukushkin",
         email = "kukushkin@ispras.ru")
     @PluginVariant(requiredParameterLabels = { 0 })
-    public MarkedClusterNet buildMarkedClusterNet(
+    public TpmMarkedClusterNet buildMarkedClusterNet(
     		final PluginContext context,
     		final XLog log) {
 
@@ -112,7 +112,7 @@ public class MainPlugin extends PerformanceMinerAlgorithm {
     	String toGroup = "Sara";
     	String measurementAttrName = "time:timestamp";
 
-    	Parameters parameters = new Parameters(
+    	TpmParameters parameters = new TpmParameters(
     			log,
     			new XAttributeLiteralImpl(groupingAttrName, new String()),
     			new XAttributeLiteralImpl(groupingAttrName, fromGroup),
