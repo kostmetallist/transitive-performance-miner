@@ -17,8 +17,8 @@ public class TpmMarkedClusterNetNode extends AbstractDirectedGraphNode {
 		getAttributeMap().put(AttributeMap.SHAPE, new RoundedRect());
 		getAttributeMap().put(AttributeMap.SQUAREBB, false);
 		getAttributeMap().put(AttributeMap.RESIZABLE, true);
-		getAttributeMap().put(AttributeMap.SIZE, new Dimension(100, 60));
-		getAttributeMap().put(AttributeMap.FILLCOLOR, Color.GREEN);
+		getAttributeMap().put(AttributeMap.SIZE, new Dimension(90, 70));
+		getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(194, 255, 215));
 		getAttributeMap().put(AttributeMap.LABEL, clusterName);
 	}
 

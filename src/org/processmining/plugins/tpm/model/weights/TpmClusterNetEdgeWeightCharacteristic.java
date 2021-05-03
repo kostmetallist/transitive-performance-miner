@@ -36,5 +36,11 @@ public class TpmClusterNetEdgeWeightCharacteristic {
 
 	public void setMaxThroughputTime(double maxThroughputTime) {
 		this.maxThroughputTime = maxThroughputTime;
-	}	
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%f;\n%f;\n%f",
+				minThroughputTime, averageThroughputTime, maxThroughputTime);
+	}
 }
