@@ -13,7 +13,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.processmining.framework.plugin.PluginContext;
-import org.processmining.plugins.tpm.TpmMarkedClusterNetVisualizationPlugin;
 
 import com.fluxicon.slickerbox.components.NiceIntegerSlider;
 import com.fluxicon.slickerbox.components.StackedCardsTabbedPane;
@@ -23,7 +22,7 @@ import com.fluxicon.slickerbox.factory.SlickerFactory;
 public class TpmVisualizerPanel extends JPanel {
 
 	private static final long serialVersionUID = 1576135631308495588L;
-	private final TpmMarkedClusterNetVisualizationPlugin vis;
+	private final TpmVisualizerListener listener;
 
 	/*
 	 * Originated from PomPomView plug-in
@@ -33,8 +32,8 @@ public class TpmVisualizerPanel extends JPanel {
 	private final Color COLOR_BG2 = new Color(120, 120, 120);
 	private final Color COLOR_FG = new Color(30, 30, 30);
 
-	public TpmVisualizerPanel(PluginContext context, TpmMarkedClusterNetVisualizationPlugin vis) {
-		this.vis = vis;
+	public TpmVisualizerPanel(PluginContext context, TpmVisualizerListener listener) {
+		this.listener = listener;
 		setBackground(new Color(240, 240, 240));
 		initializeGui();
 	}
@@ -52,7 +51,7 @@ public class TpmVisualizerPanel extends JPanel {
 
 		nodeSignificanceSlider = SlickerFactory.instance().createNiceIntegerSlider("Significance cutoff", 0, 100, 0,
 				Orientation.VERTICAL);
-		nodeSignificanceSlider.addChangeListener(vis);
+		nodeSignificanceSlider.addChangeListener(listener);
 		nodeSignificanceSlider.setOpaque(false);
 		nodeSignificanceSlider.setToolTipText("<html>The lower this value, the more<br>"
 				+ "events are shown as single activities,<br>" + "increasing the detail and complexity<br>"
