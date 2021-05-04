@@ -26,6 +26,7 @@
     -->
 
     <!-- Third party library downloaded from maven repository. -->
+    <dependency conf="lib->default" org="com.google.guava" name="guava" rev="30.1.1-jre" />
     <dependency conf="lib->default" org="me.tongfei" name="progressbar" rev="0.9.1" />
     <dependency conf="lib->default" org="org.apache.commons" name="commons-text" rev="1.8" />
     <dependency conf="lib->default" org="org.apache.logging.log4j" name="log4j-api" rev="2.14.1" />

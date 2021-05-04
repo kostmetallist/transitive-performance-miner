@@ -298,7 +298,7 @@ public class TpmAlgorithm {
 		mcn.addCluster(parameters.getFromValue().getValue());
 		mcn.addCluster(parameters.getToValue().getValue());
 		
-		TpmClusterNetEdgeWeightCharacteristic wChar = new TpmClusterNetEdgeWeightCharacteristic(
+		TpmClusterNetEdgeWeightCharacteristic wChar = TpmClusterNetEdgeWeightCharacteristic.createTemporalCharacteristic(
 				estimationsByTraces.values().stream().mapToDouble(x -> x).min().getAsDouble(),
 				estimationsByTraces.values().stream().mapToDouble(x -> x).average().getAsDouble(),
 				estimationsByTraces.values().stream().mapToDouble(x -> x).max().getAsDouble()
