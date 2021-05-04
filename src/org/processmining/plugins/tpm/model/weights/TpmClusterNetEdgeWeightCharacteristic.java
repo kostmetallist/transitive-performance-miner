@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.processmining.plugins.tpm.util.TpmPair;
@@ -22,14 +23,16 @@ public class TpmClusterNetEdgeWeightCharacteristic {
 		TimeUnit.DAYS
 	};
 	
-	private static Map<TimeUnit, String> timeUnitsDesignations = ImmutableMap.<TimeUnit, String>builder()
-			.put(TimeUnit.NANOSECONDS, "ns")
-			.put(TimeUnit.MICROSECONDS, "us")
-			.put(TimeUnit.MILLISECONDS, "ms")
-			.put(TimeUnit.SECONDS, "s")
-			.put(TimeUnit.MINUTES, "m")
-			.put(TimeUnit.HOURS, "h")
-			.put(TimeUnit.DAYS, "d")
+	private static Map<TimeUnit, TpmPair<String, Integer>> timeUnitsDesignations =
+			ImmutableMap.<TimeUnit, TpmPair<String, Integer>>builder()
+
+			.put(TimeUnit.NANOSECONDS,  new TpmPair<>("ns", 1_000))
+			.put(TimeUnit.MICROSECONDS, new TpmPair<>("us", 1_000))
+			.put(TimeUnit.MILLISECONDS, new TpmPair<>("ms", 1_000))
+			.put(TimeUnit.SECONDS,      new TpmPair<>("s",  60))
+			.put(TimeUnit.MINUTES,      new TpmPair<>("m",  60))
+			.put(TimeUnit.HOURS,        new TpmPair<>("h",  24))
+			.put(TimeUnit.DAYS,         new TpmPair<>("d",  null))
 			.build();
 
 	private boolean isTemporal;
@@ -159,10 +162,18 @@ public class TpmClusterNetEdgeWeightCharacteristic {
 			}
 		}
 		
+		Function<TpmPair<TimeUnit, Long>, String> convert = x -> {
+			
+			TpmPair<String, Integer> designation = timeUnitsDesignations.get(x.get_1());
+			return String.format("%d%s",
+					(designation.get_2() != null)? (x.get_2() % designation.get_2()): x.get_2(),
+					designation.get_1());
+		};
+		
 		return result.stream()
 				.filter(x -> x.get_2() != 0)
 				.limit(3)
-				.map(x -> String.format("%d%s", x.get_2(), timeUnitsDesignations.get(x.get_1())))
+				.map(convert)
 				.collect(Collectors.joining(" "));
 	}
 
@@ -175,11 +186,11 @@ public class TpmClusterNetEdgeWeightCharacteristic {
 				averageRepr = getTemporalMeasurementRepresentation(timeUnit, averageIntegralMetric),
 				maxRepr = getTemporalMeasurementRepresentation(timeUnit, maxIntegralMetric);
 				
-			return String.format("%s;%n%s;%n%s",
+			return String.format("%s; %n%s; %n%s",
 					minRepr, averageRepr, maxRepr);
 
 		} else {
-			return String.format("%.2f;%n%.2f;%n%.2f",
+			return String.format("%.2f; %n%.2f; %n%.2f",
 					minIntegralMetric, averageIntegralMetric, maxIntegralMetric);
 		}
 	}
