@@ -104,11 +104,6 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 						TitledBorder.CENTER,
 						new Font(Font.SANS_SERIF, Font.BOLD, 14)));
 
-//		TpmScrollableGridLayout clusterizationLayout = new TpmScrollableGridLayout(clusterizationPanel, 4, 4, 0, 0);
-//		clusterizationLayout.setRowFixed(0, true);
-//		clusterizationLayout.setRowFixed(1, true);
-//		clusterizationPanel.setLayout(clusterizationLayout);
-		
 		GridBagLayout clusterizationLayout = new GridBagLayout();
 		GridBagConstraints clusterizationLayoutConstraints = new GridBagConstraints();
 		clusterizationPanel.setLayout(clusterizationLayout);
@@ -146,11 +141,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 				defaultMeasurementAttributeDist = measurementDist;
 			}
 		}
-		
-//		groupingAttributeLabel = SlickerFactory.instance().createLabel("  Grouping attribute:");
-//		clusterizationDetailsLayout.setPosition(groupingAttributeLabel, 0, 0);
-//		clusterizationDetails.add(groupingAttributeLabel);
-		
+
 		groupingAttributeLabel = SlickerFactory.instance().createLabel("  Grouping attribute:");
 		clusterizationLayoutConstraints.fill = GridBagConstraints.VERTICAL;
 		clusterizationLayoutConstraints.gridx = 0;
@@ -159,12 +150,6 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		clusterizationLayoutConstraints.ipady = 10;
 		clusterizationLayoutConstraints.anchor = GridBagConstraints.LINE_START;
 		clusterizationPanel.add(groupingAttributeLabel, clusterizationLayoutConstraints);
-
-//		groupingAttributeComboBox = SlickerFactory.instance().createComboBox(attributesMapping.keySet()
-//				.toArray(new String[attributesMapping.size()]));
-//		groupingAttributeComboBox.setSelectedItem(defaultGroupingAttribute);
-//		clusterizationLayout.setPosition(groupingAttributeComboBox, 0, 1);
-//		clusterizationPanel.add(groupingAttributeComboBox);
 		
 		groupingAttributeComboBox = SlickerFactory.instance().createComboBox(attributesMapping.keySet()
 				.toArray(new String[attributesMapping.size()]));
@@ -173,22 +158,12 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		clusterizationLayoutConstraints.gridx = 0;
 		clusterizationLayoutConstraints.gridy = 1;
 		clusterizationPanel.add(groupingAttributeComboBox, clusterizationLayoutConstraints);
-		
-//		measurementAttributeLabel = SlickerFactory.instance().createLabel("  Measurement attribute:");
-//		clusterizationLayout.setPosition(measurementAttributeLabel, 0, 2);
-//		clusterizationPanel.add(measurementAttributeLabel);
-		
+
 		measurementAttributeLabel = SlickerFactory.instance().createLabel("  Measurement attribute:");
 		clusterizationLayoutConstraints.fill = GridBagConstraints.VERTICAL;
 		clusterizationLayoutConstraints.gridx = 0;
 		clusterizationLayoutConstraints.gridy = 2;
 		clusterizationPanel.add(measurementAttributeLabel, clusterizationLayoutConstraints);
-
-//		measurementAttributeComboBox = SlickerFactory.instance().createComboBox(attributesMapping.keySet()
-//				.toArray(new String[attributesMapping.size()]));
-//		measurementAttributeComboBox.setSelectedItem(defaultMeasurementAttribute);
-//		clusterizationLayout.setPosition(measurementAttributeComboBox, 0, 3);
-//		clusterizationPanel.add(measurementAttributeComboBox);
 		
 		measurementAttributeComboBox = SlickerFactory.instance().createComboBox(attributesMapping.keySet()
 				.toArray(new String[attributesMapping.size()]));
