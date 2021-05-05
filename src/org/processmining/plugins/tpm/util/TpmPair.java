@@ -1,7 +1,5 @@
 package org.processmining.plugins.tpm.util;
 
-import org.processmining.plugins.tpm.parameters.TpmParameters;
-
 public class TpmPair<T, S> {
 	
 	private T _1;

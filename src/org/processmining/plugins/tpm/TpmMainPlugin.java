@@ -52,7 +52,7 @@ public class TpmMainPlugin extends TpmAlgorithm {
 
 		progress.setValue(20);
 		progress.setCaption("Performing event log processing...");
-		TpmMarkedClusterNet mcn = this.apply(context, log, parameters);
+		TpmMarkedClusterNet mcn = this.buildMCN(context, log, parameters);
 
 		if (parameters.isTryConnections()) {
 			context.getConnectionManager().addConnection(
@@ -69,7 +69,7 @@ public class TpmMainPlugin extends TpmAlgorithm {
 	        author = "Konstantin Kukushkin",
 	        email = "kukushkin@ispras.ru")
     @PluginVariant(requiredParameterLabels = { 0 })
-    public TpmMarkedClusterNet buildMarkedClusterNetUI(
+    public TpmMarkedClusterNet runUI(
     		final UIPluginContext context,
     		final XLog log) {
 
@@ -84,7 +84,7 @@ public class TpmMainPlugin extends TpmAlgorithm {
 	        author = "Konstantin Kukushkin",
 	        email = "kukushkin@ispras.ru")
     @PluginVariant(requiredParameterLabels = { 0, 1 })
-    public TpmMarkedClusterNet buildMarkedClusterNet(
+    public TpmMarkedClusterNet run(
     		final PluginContext context,
     		final XLog log,
     		final TpmParameters parameters) {
@@ -106,7 +106,7 @@ public class TpmMainPlugin extends TpmAlgorithm {
         author = "Konstantin Kukushkin",
         email = "kukushkin@ispras.ru")
     @PluginVariant(requiredParameterLabels = { 0 })
-    public TpmMarkedClusterNet buildMarkedClusterNet(
+    public TpmMarkedClusterNet run(
     		final PluginContext context,
     		final XLog log) {
 
@@ -121,8 +121,9 @@ public class TpmMainPlugin extends TpmAlgorithm {
     			new XAttributeLiteralImpl(groupingAttrName, new String()),
     			new XAttributeLiteralImpl(groupingAttrName, fromGroup),
     			new XAttributeLiteralImpl(groupingAttrName, toGroup),
-    			new XAttributeTimestampImpl(measurementAttrName, 0));
+    			new XAttributeTimestampImpl(measurementAttrName, 0),
+    			false);
 
-        return buildMarkedClusterNet(context, log, parameters);
+        return run(context, log, parameters);
     }
 }

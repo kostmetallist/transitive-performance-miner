@@ -2,22 +2,29 @@ package org.processmining.plugins.tpm.ui;
 
 import com.fluxicon.slickerbox.factory.SlickerFactory;
 
-//import info.clearthought.layout.TableLayout;
-//import info.clearthought.layout.TableLayoutConstants;
-//
-//import java.awt.event.ActionEvent;
-//import java.awt.event.ActionListener;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.apache.logging.log4j.Logger;
@@ -42,19 +49,21 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 	
 	private Map<String, XAttribute> attributesMapping;
 
-	private JPanel clusterizationPanel;
-	private JPanel anomaliesPanel;
+	private JPanel clusterizationPanel, clusterizationDetails, anomaliesPanel;
 
 	private JComboBox<String> groupingAttributeComboBox, measurementAttributeComboBox;
 
 	private JLabel groupingAttributeLabel, fromGroupingValueLabel, toGroupingValueLabel, measurementAttributeLabel;
 	private JTextField fromGroupingValueTextField, toGroupingValueTextField;
 	
-	private JLabel enableAnomaliesDetectionLabel;
+	private JRadioButton intraClusterModeRadio, fullAnalysisModeRadio;
+	private ButtonGroup clusterizationModeButtons;
+	
 	private JCheckBox enableAnomaliesDetectionCheckBox;
+	private JLabel anomaliesDetectionThresholdLabel;
+	private JSlider anomaliesDetectionThreshold;
 
-	public TpmClusterizationAndAnomaliesDialog(XLog log,
-			TpmParameters parameters) {
+	public TpmClusterizationAndAnomaliesDialog(XLog log, TpmParameters parameters) {
 
 		this.log = log;
 		this.parameters = parameters;
@@ -63,12 +72,13 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 	
 	protected void initComponents() {
 
-		TpmScrollableGridLayout rootLayout = new TpmScrollableGridLayout(this, 2, 5, 0, 0);
+		TpmScrollableGridLayout rootLayout = new TpmScrollableGridLayout(this, 2, 4, 0, 0);
 		rootLayout.setRowFixed(0, true);
-		rootLayout.setRowFixed(1, true);
+		// TODO investigate changes
+//		rootLayout.setRowFixed(1, true);
 		this.setLayout(rootLayout);
 
-		JLabel headerLabel = SlickerFactory.instance().createLabel("<html><h1>Configuration Step 2</h1>");
+		JLabel headerLabel = SlickerFactory.instance().createLabel("<html><h2>Clusterization and Anomalies</h2>");
 		rootLayout.setPosition(headerLabel, 0, 0);
 		add(headerLabel);
 
@@ -77,7 +87,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		add(clusterizationPanel);
 
 		buildAnomaliesPanel();
-		rootLayout.setPosition(anomaliesPanel, 0, 4);
+		rootLayout.setPosition(anomaliesPanel, 0, 2);
 		add(anomaliesPanel);	
 	}
 	
@@ -85,12 +95,22 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 	private void buildClusterizationPanel() {
 
 		clusterizationPanel = SlickerFactory.instance().createRoundedPanel();
-		clusterizationPanel.setBorder(BorderFactory.createTitledBorder("Configure Main Algorithm Parameters"));
+		clusterizationPanel.setBorder(BorderFactory.createTitledBorder(
+						BorderFactory.createCompoundBorder(
+							BorderFactory.createEmptyBorder(30, 15, 15, 15),
+							BorderFactory.createEtchedBorder(EtchedBorder.RAISED)),
+						"Core Algorithm Options",
+						TitledBorder.DEFAULT_JUSTIFICATION,
+						TitledBorder.CENTER,
+						new Font(Font.SANS_SERIF, Font.BOLD, 14)));
 
-		TpmScrollableGridLayout clusterizationLayout = new TpmScrollableGridLayout(clusterizationPanel, 4, 2, 0, 0);
-		clusterizationLayout.setRowFixed(0, true);
-		clusterizationLayout.setRowFixed(1, true);
-
+//		TpmScrollableGridLayout clusterizationLayout = new TpmScrollableGridLayout(clusterizationPanel, 4, 4, 0, 0);
+//		clusterizationLayout.setRowFixed(0, true);
+//		clusterizationLayout.setRowFixed(1, true);
+//		clusterizationPanel.setLayout(clusterizationLayout);
+		
+		GridBagLayout clusterizationLayout = new GridBagLayout();
+		GridBagConstraints clusterizationLayoutConstraints = new GridBagConstraints();
 		clusterizationPanel.setLayout(clusterizationLayout);
 
 		final List<XAttribute> availableAttributes = log.getGlobalEventAttributes();
@@ -127,49 +147,149 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 			}
 		}
 		
-		groupingAttributeLabel = SlickerFactory.instance().createLabel("Grouping attribute:");
-		clusterizationLayout.setPosition(groupingAttributeLabel, 0, 0);
-		clusterizationPanel.add(groupingAttributeLabel);
+//		groupingAttributeLabel = SlickerFactory.instance().createLabel("  Grouping attribute:");
+//		clusterizationDetailsLayout.setPosition(groupingAttributeLabel, 0, 0);
+//		clusterizationDetails.add(groupingAttributeLabel);
+		
+		groupingAttributeLabel = SlickerFactory.instance().createLabel("  Grouping attribute:");
+		clusterizationLayoutConstraints.fill = GridBagConstraints.VERTICAL;
+		clusterizationLayoutConstraints.gridx = 0;
+		clusterizationLayoutConstraints.gridy = 0;
+		clusterizationLayoutConstraints.weightx = 0.4;
+		clusterizationLayoutConstraints.ipady = 10;
+		clusterizationLayoutConstraints.anchor = GridBagConstraints.LINE_START;
+		clusterizationPanel.add(groupingAttributeLabel, clusterizationLayoutConstraints);
 
+//		groupingAttributeComboBox = SlickerFactory.instance().createComboBox(attributesMapping.keySet()
+//				.toArray(new String[attributesMapping.size()]));
+//		groupingAttributeComboBox.setSelectedItem(defaultGroupingAttribute);
+//		clusterizationLayout.setPosition(groupingAttributeComboBox, 0, 1);
+//		clusterizationPanel.add(groupingAttributeComboBox);
+		
 		groupingAttributeComboBox = SlickerFactory.instance().createComboBox(attributesMapping.keySet()
 				.toArray(new String[attributesMapping.size()]));
 		groupingAttributeComboBox.setSelectedItem(defaultGroupingAttribute);
-		clusterizationLayout.setPosition(groupingAttributeComboBox, 0, 1);
-		clusterizationPanel.add(groupingAttributeComboBox);
+		clusterizationLayoutConstraints.fill = GridBagConstraints.VERTICAL;
+		clusterizationLayoutConstraints.gridx = 0;
+		clusterizationLayoutConstraints.gridy = 1;
+		clusterizationPanel.add(groupingAttributeComboBox, clusterizationLayoutConstraints);
 		
-		fromGroupingValueLabel = SlickerFactory.instance().createLabel("From value:");
-		clusterizationLayout.setPosition(fromGroupingValueLabel, 1, 0);
-		clusterizationPanel.add(fromGroupingValueLabel);
+//		measurementAttributeLabel = SlickerFactory.instance().createLabel("  Measurement attribute:");
+//		clusterizationLayout.setPosition(measurementAttributeLabel, 0, 2);
+//		clusterizationPanel.add(measurementAttributeLabel);
 		
-		fromGroupingValueTextField = new JTextField("Department A");
-		clusterizationLayout.setPosition(fromGroupingValueTextField, 1, 1);
-		clusterizationPanel.add(fromGroupingValueTextField);
-		
-		toGroupingValueLabel = SlickerFactory.instance().createLabel("To value:");
-		clusterizationLayout.setPosition(toGroupingValueLabel, 2, 0);
-		clusterizationPanel.add(toGroupingValueLabel);
-		
-		toGroupingValueTextField = new JTextField("Department B");
-		clusterizationLayout.setPosition(toGroupingValueTextField, 2, 1);
-		clusterizationPanel.add(toGroupingValueTextField);
-		
-		measurementAttributeLabel = SlickerFactory.instance().createLabel("Measurement attribute:");
-		clusterizationLayout.setPosition(measurementAttributeLabel, 3, 0);
-		clusterizationPanel.add(measurementAttributeLabel);
+		measurementAttributeLabel = SlickerFactory.instance().createLabel("  Measurement attribute:");
+		clusterizationLayoutConstraints.fill = GridBagConstraints.VERTICAL;
+		clusterizationLayoutConstraints.gridx = 0;
+		clusterizationLayoutConstraints.gridy = 2;
+		clusterizationPanel.add(measurementAttributeLabel, clusterizationLayoutConstraints);
 
+//		measurementAttributeComboBox = SlickerFactory.instance().createComboBox(attributesMapping.keySet()
+//				.toArray(new String[attributesMapping.size()]));
+//		measurementAttributeComboBox.setSelectedItem(defaultMeasurementAttribute);
+//		clusterizationLayout.setPosition(measurementAttributeComboBox, 0, 3);
+//		clusterizationPanel.add(measurementAttributeComboBox);
+		
 		measurementAttributeComboBox = SlickerFactory.instance().createComboBox(attributesMapping.keySet()
 				.toArray(new String[attributesMapping.size()]));
 		measurementAttributeComboBox.setSelectedItem(defaultMeasurementAttribute);
-		clusterizationLayout.setPosition(measurementAttributeComboBox, 3, 1);
-		clusterizationPanel.add(measurementAttributeComboBox);
+		clusterizationLayoutConstraints.fill = GridBagConstraints.VERTICAL;
+		clusterizationLayoutConstraints.gridx = 0;
+		clusterizationLayoutConstraints.gridy = 3;
+		clusterizationPanel.add(measurementAttributeComboBox, clusterizationLayoutConstraints);
+		
+		clusterizationDetails = SlickerFactory.instance().createRoundedPanel();
+		clusterizationDetails.setBorder(BorderFactory.createTitledBorder(
+				BorderFactory.createCompoundBorder(
+						BorderFactory.createEmptyBorder(10, 10, 10, 10),
+						BorderFactory.createLineBorder(Color.DARK_GRAY, 1)),
+					"Clusterization Mode and Details",
+					TitledBorder.DEFAULT_JUSTIFICATION,
+					TitledBorder.CENTER,
+					new Font(Font.SANS_SERIF, Font.BOLD, 14)));
+
+		clusterizationDetails.setLayout(new GridLayout(3, 2, 6, 2));
+		
+		intraClusterModeRadio = SlickerFactory.instance().createRadioButton("Intra-cluster analysis");
+		intraClusterModeRadio.setBorder(BorderFactory.createEmptyBorder(15, 10, 0, 0));
+		intraClusterModeRadio.setSelected(true);
+		clusterizationDetails.add(intraClusterModeRadio);
+		
+		fullAnalysisModeRadio = SlickerFactory.instance().createRadioButton("Full analysis (pairwise dependencies)");
+		fullAnalysisModeRadio.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 10));
+		fullAnalysisModeRadio.setSelected(false);
+		clusterizationDetails.add(fullAnalysisModeRadio);
+		
+		clusterizationModeButtons = new ButtonGroup();
+		clusterizationModeButtons.add(intraClusterModeRadio);
+		clusterizationModeButtons.add(fullAnalysisModeRadio);
+		
+		fromGroupingValueLabel = SlickerFactory.instance().createLabel("From value:");
+		fromGroupingValueLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 0));
+		clusterizationDetails.add(fromGroupingValueLabel);
+		
+		toGroupingValueLabel = SlickerFactory.instance().createLabel("To value:");
+		toGroupingValueLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 0));
+		clusterizationDetails.add(toGroupingValueLabel);
+		
+		fromGroupingValueTextField = new JTextField("Department A");
+		fromGroupingValueTextField.setBorder(BorderFactory.createCompoundBorder(
+				fromGroupingValueTextField.getBorder(), 
+		        BorderFactory.createEmptyBorder(0, 8, 0, 8)));
+		clusterizationDetails.add(fromGroupingValueTextField);
+		
+		toGroupingValueTextField = new JTextField("Department B");
+		toGroupingValueTextField.setBorder(BorderFactory.createCompoundBorder(
+				toGroupingValueTextField.getBorder(), 
+		        BorderFactory.createEmptyBorder(0, 8, 0, 8)));
+		clusterizationDetails.add(toGroupingValueTextField);
+		
+		clusterizationLayoutConstraints.fill = GridBagConstraints.VERTICAL;
+		clusterizationLayoutConstraints.gridheight = 4;
+		clusterizationLayoutConstraints.gridx = 1;
+		clusterizationLayoutConstraints.gridy = 0;
+		clusterizationLayoutConstraints.weightx = 0;
+		clusterizationLayoutConstraints.ipady = 0;
+		clusterizationPanel.add(clusterizationDetails, clusterizationLayoutConstraints);
+		
+		intraClusterModeRadio.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (intraClusterModeRadio.isSelected()) {
+					fromGroupingValueTextField.setEditable(true);
+					toGroupingValueTextField.setEditable(true);
+					revalidate();
+					repaint();
+				}
+			}
+		});
+		
+		fullAnalysisModeRadio.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (fullAnalysisModeRadio.isSelected()) {
+					fromGroupingValueTextField.setEditable(false);
+					toGroupingValueTextField.setEditable(false);
+					revalidate();
+					repaint();
+				}
+			}
+		});
 	}
 	
 	private void buildAnomaliesPanel(){
 
 		anomaliesPanel = SlickerFactory.instance().createRoundedPanel();
-		anomaliesPanel.setBorder(BorderFactory.createTitledBorder("Define Anomalies Detection Options"));
+		anomaliesPanel.setBorder(BorderFactory.createTitledBorder(
+				BorderFactory.createCompoundBorder(
+					BorderFactory.createEmptyBorder(30, 15, 15, 15),
+					BorderFactory.createEtchedBorder(EtchedBorder.RAISED)),
+				"Anomalies Detection Options",
+				TitledBorder.DEFAULT_JUSTIFICATION,
+				TitledBorder.CENTER,
+				new Font(Font.SANS_SERIF, Font.BOLD, 14)));
 	
-		TpmScrollableGridLayout anomaliesLayout = new TpmScrollableGridLayout(anomaliesPanel, 4, 2, 0, 0);
+		TpmScrollableGridLayout anomaliesLayout = new TpmScrollableGridLayout(anomaliesPanel, 1, 3, 0, 0);
 		anomaliesLayout.setRowFixed(0, true);
 		anomaliesLayout.setRowFixed(1, true);
 		anomaliesPanel.setLayout(anomaliesLayout);
@@ -178,9 +298,13 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		anomaliesLayout.setPosition(enableAnomaliesDetectionCheckBox, 0, 0);
 		anomaliesPanel.add(enableAnomaliesDetectionCheckBox);
 		
-		enableAnomaliesDetectionLabel = SlickerFactory.instance().createLabel("Enable anomalies detection");
-		anomaliesLayout.setPosition(enableAnomaliesDetectionLabel, 0, 1);
-		anomaliesPanel.add(enableAnomaliesDetectionLabel);
+		anomaliesDetectionThresholdLabel = SlickerFactory.instance().createLabel("Anomalies relative value threshold");
+		anomaliesLayout.setPosition(anomaliesDetectionThresholdLabel, 0, 1);
+		anomaliesPanel.add(anomaliesDetectionThresholdLabel);
+		
+		anomaliesDetectionThreshold = SlickerFactory.instance().createSlider(JSlider.HORIZONTAL);
+		anomaliesLayout.setPosition(anomaliesDetectionThreshold, 0, 2);
+		anomaliesPanel.add(anomaliesDetectionThreshold);
 	}
 
 	public void fillSettings() {
@@ -191,6 +315,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		parameters.setFromValue(new XAttributeLiteralImpl(groupingAttr.getKey(), fromGroupingValueTextField.getText()));
 		parameters.setToValue(new XAttributeLiteralImpl(groupingAttr.getKey(), toGroupingValueTextField.getText()));
 		parameters.setMeasurementAttr((XAttributeTimestamp) attributesMapping.get(measurementAttributeComboBox.getSelectedItem()));
+		parameters.setFullAnalysisEnabled(fullAnalysisModeRadio.isSelected());
 
 		if (enableAnomaliesDetectionCheckBox.isSelected()) {
 			// TODO stuff

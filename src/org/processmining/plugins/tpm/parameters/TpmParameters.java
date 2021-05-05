@@ -17,14 +17,20 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 	private XAttributeLiteral fromValue;
 	private XAttributeLiteral toValue;
 	private XAttributeTimestamp measurementAttr;
+	private boolean fullAnalysisEnabled;
 
 	public TpmParameters() {
 		super();
 		setTryConnections(true);
 	}
 
-	public TpmParameters(XLog log, XAttribute groupingAttr,
-			XAttributeLiteral fromValue, XAttributeLiteral toValue, XAttributeTimestamp measurementAttr) {
+	public TpmParameters(
+			XLog log,
+			XAttribute groupingAttr,
+			XAttributeLiteral fromValue,
+			XAttributeLiteral toValue,
+			XAttributeTimestamp measurementAttr,
+			boolean fullAnalysisEnabled) {
 
 		super();
 		setClassifier(XUtils.getDefaultClassifier(log));
@@ -34,6 +40,7 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 		setFromValue(fromValue);
 		setToValue(toValue);
 		setMeasurementAttr(measurementAttr);
+		setFullAnalysisEnabled(fullAnalysisEnabled);
 	}
 
 	public TpmParameters(TpmParameters parameters) {
@@ -45,14 +52,29 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 		setFromValue(parameters.getFromValue());
 		setToValue(parameters.getToValue());
 		setMeasurementAttr(parameters.getMeasurementAttr());
+		setFullAnalysisEnabled(parameters.isFullAnalysisEnabled());
 	}
 
-	public void setClassifier(XEventClassifier classifier) {
-		this.classifier = classifier;
+	public boolean equals(Object object) {
+		if (object instanceof TpmParameters) {
+			TpmParameters parameters = (TpmParameters) object;
+			return super.equals(parameters)
+					&& getClassifier().equals(parameters.getClassifier())
+					&& getGroupingAttr().equals(parameters.getGroupingAttr())
+					&& getFromValue().equals(parameters.getFromValue())
+					&& getToValue().equals(parameters.getToValue())
+					&& getMeasurementAttr().equals(parameters.getMeasurementAttr())
+					&& isFullAnalysisEnabled() == parameters.isFullAnalysisEnabled();
+		}
+		return false;
 	}
-
+	
 	public XEventClassifier getClassifier() {
 		return classifier;
+	}
+	
+	public void setClassifier(XEventClassifier classifier) {
+		this.classifier = classifier;
 	}
 	
 	public XAttribute getGroupingAttr() {
@@ -61,14 +83,6 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 
 	public void setGroupingAttr(XAttribute groupingAttr) {
 		this.groupingAttr = groupingAttr;
-	}
-
-	public boolean equals(Object object) {
-		if (object instanceof TpmParameters) {
-			TpmParameters parameters = (TpmParameters) object;
-			return super.equals(parameters) && getClassifier().equals(parameters.getClassifier());
-		}
-		return false;
 	}
 	
 	public XAttributeLiteral getFromValue() {
@@ -93,5 +107,13 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 
 	public void setMeasurementAttr(XAttributeTimestamp measurementAttr) {
 		this.measurementAttr = measurementAttr;
+	}
+	
+	public boolean isFullAnalysisEnabled() {
+		return fullAnalysisEnabled;
+	}
+
+	public void setFullAnalysisEnabled(boolean fullAnalysisEnabled) {
+		this.fullAnalysisEnabled = fullAnalysisEnabled;
 	}
 }

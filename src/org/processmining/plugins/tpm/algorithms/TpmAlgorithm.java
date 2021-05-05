@@ -197,7 +197,7 @@ public class TpmAlgorithm {
 		return indicators;
 	}
 
-	public TpmMarkedClusterNet apply(PluginContext context, XLog log,
+	public TpmMarkedClusterNet buildMCN(PluginContext context, XLog log,
 			TpmParameters parameters) {
 
 		XLogInfo logInfo = XLogInfoFactory.createLogInfo(log, parameters.getClassifier());
@@ -205,8 +205,6 @@ public class TpmAlgorithm {
 
 		LOGGER.info(String.format("Processing log with %d traces and %d events...",
 				logInfo.getNumberOfTraces(), logInfo.getNumberOfEvents()));
-		
-		// TODO print out relative frequency of tracked attribute @code{groupingAttrName}
 
 		Map<String, List<TpmTraceEntry>> tracesWithMatchedEvents = new HashMap<>();
 		Map<Integer, Integer> globalToLocalIndices = new HashMap<>();

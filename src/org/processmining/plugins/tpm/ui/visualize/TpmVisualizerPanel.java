@@ -1,5 +1,8 @@
 package org.processmining.plugins.tpm.ui.visualize;
 
+import com.fluxicon.slickerbox.components.NiceIntegerSlider;
+import com.fluxicon.slickerbox.components.StackedCardsTabbedPane;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -13,11 +16,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.processmining.framework.plugin.PluginContext;
-
-import com.fluxicon.slickerbox.components.NiceIntegerSlider;
-import com.fluxicon.slickerbox.components.StackedCardsTabbedPane;
-import com.fluxicon.slickerbox.components.NiceSlider.Orientation;
-import com.fluxicon.slickerbox.factory.SlickerFactory;
 
 public class TpmVisualizerPanel extends JPanel {
 
@@ -48,15 +46,6 @@ public class TpmVisualizerPanel extends JPanel {
 		upperControlPanel.setBackground(COLOR_BG2);
 		upperControlPanel.setOpaque(true);
 		upperControlPanel.setLayout(new BorderLayout());
-
-		nodeSignificanceSlider = SlickerFactory.instance().createNiceIntegerSlider("Significance cutoff", 0, 100, 0,
-				Orientation.VERTICAL);
-		nodeSignificanceSlider.addChangeListener(listener);
-		nodeSignificanceSlider.setOpaque(false);
-		nodeSignificanceSlider.setToolTipText("<html>The lower this value, the more<br>"
-				+ "events are shown as single activities,<br>" + "increasing the detail and complexity<br>"
-				+ "of the model.</html>");
-		upperControlPanel.add(nodeSignificanceSlider, BorderLayout.CENTER);
 
 		JPanel lowerControlPanel = new JPanel(); // lowerControlPanel is the Edge filter panel
 		lowerControlPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -90,10 +79,10 @@ public class TpmVisualizerPanel extends JPanel {
 		setLayout(new BorderLayout());
 		setOpaque(false);
 		add(tabPane, BorderLayout.CENTER);
-
 	}
 
 	protected JPanel packVerticallyCentered(JComponent component, int width, int height) {
+
 		JPanel boxed = new JPanel();
 		boxed.setLayout(new BoxLayout(boxed, BoxLayout.X_AXIS));
 		boxed.setBorder(BorderFactory.createEmptyBorder());
