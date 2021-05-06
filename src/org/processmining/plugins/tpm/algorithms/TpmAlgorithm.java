@@ -44,8 +44,8 @@ import org.processmining.framework.plugin.PluginContext;
 public class TpmAlgorithm {
 	
 	private static final Logger LOGGER = LogManager.getRootLogger();
+	// TODO move to parameters
 	private static final int SOLVER_TIMEOUT = 100;  // in seconds
-	private static final String TRACE_NAME_ATTR = "concept:name";
 	
 	private static double calculateWeightForIJ(int i, int j) {
 		return 1.0 / (j - i);
@@ -67,7 +67,8 @@ public class TpmAlgorithm {
 		return toTs - fromTs;
 	}
 	
-	private TpmPair<Map<Integer, List<TpmClusterTransitionIndicator>>, Map<Integer, List<TpmClusterTransitionIndicator>>> getOutgoingIngoingMapping(
+	private TpmPair<Map<Integer, List<TpmClusterTransitionIndicator>>,
+					Map<Integer, List<TpmClusterTransitionIndicator>>> getOutgoingIngoingMapping(
 			List<TpmClusterTransitionIndicator> indicators) {
 		
 		Map<Integer, List<TpmClusterTransitionIndicator>> outgoing = new HashMap<>();
@@ -95,30 +96,34 @@ public class TpmAlgorithm {
 			}
 		}
 
-		LOGGER.debug("Outgoing:");
-		for (int nodeIndex : outgoing.keySet()) {
+		if (LOGGER.getLevel().isLessSpecificThan(Level.DEBUG)) {
 
-			LOGGER.debug(String.format("  From %d:", nodeIndex));
-			for (TpmClusterTransitionIndicator cti : outgoing.get(nodeIndex)) {
+			LOGGER.debug("Outgoing:");
+			for (int nodeIndex : outgoing.keySet()) {
 
-				LOGGER.debug(String.format("    %s:", cti));
+				LOGGER.debug(String.format("  From %d:", nodeIndex));
+				for (TpmClusterTransitionIndicator cti : outgoing.get(nodeIndex)) {
+
+					LOGGER.debug(String.format("    %s:", cti));
+				}
 			}
-		}
-		
-		LOGGER.debug("Ingoing:");
-		for (int nodeIndex : ingoing.keySet()) {
+			
+			LOGGER.debug("Ingoing:");
+			for (int nodeIndex : ingoing.keySet()) {
 
-			LOGGER.debug(String.format("  To %d:", nodeIndex));
-			for (TpmClusterTransitionIndicator cti : ingoing.get(nodeIndex)) {
+				LOGGER.debug(String.format("  To %d:", nodeIndex));
+				for (TpmClusterTransitionIndicator cti : ingoing.get(nodeIndex)) {
 
-				LOGGER.debug(String.format("    %s:", cti));
+					LOGGER.debug(String.format("    %s:", cti));
+				}
 			}
 		}
 
 		return new TpmPair<>(outgoing, ingoing);
 	}
 	
-	private List<TpmClusterTransitionIndicator> selectOptimalTransitions(List<TpmClusterTransitionIndicator> initialIndicators) {
+	private List<TpmClusterTransitionIndicator> selectOptimalTransitions(
+			List<TpmClusterTransitionIndicator> initialIndicators) {
 
 		List<TpmClusterTransitionIndicator> filteredIndicators = new ArrayList<>();
 		
@@ -173,8 +178,10 @@ public class TpmAlgorithm {
 		return filteredIndicators;
 	}
 	
-	private List<TpmClusterTransitionIndicator> gatherTransitionIndicators(List<TpmTraceEntry> traceSliceEntries,
-			XAttribute attrFrom, XAttribute attrTo) {
+	private List<TpmClusterTransitionIndicator> gatherTransitionIndicators(
+			List<TpmTraceEntry> traceSliceEntries,
+			XAttribute attrFrom,
+			XAttribute attrTo) {
 		
 		List<TpmClusterTransitionIndicator> indicators = new ArrayList<>();
 		Set<TpmTraceEntry> previousFromClusterEntries = new HashSet<>();
@@ -197,7 +204,9 @@ public class TpmAlgorithm {
 		return indicators;
 	}
 
-	public TpmMarkedClusterNet buildMCN(PluginContext context, XLog log,
+	public TpmMarkedClusterNet buildMCN(
+			PluginContext context,
+			XLog log,
 			TpmParameters parameters) {
 
 		XLogInfo logInfo = XLogInfoFactory.createLogInfo(log, parameters.getClassifier());
@@ -208,14 +217,21 @@ public class TpmAlgorithm {
 
 		Map<String, List<TpmTraceEntry>> tracesWithMatchedEvents = new HashMap<>();
 		Map<Integer, Integer> globalToLocalIndices = new HashMap<>();
-		ProgressBarBuilder pbb = new ProgressBarBuilder();
-		pbb.setStyle(ProgressBarStyle.ASCII);
+//		ProgressBarBuilder pbb = new ProgressBarBuilder();
+//		pbb.setStyle(ProgressBarStyle.ASCII);
+ 
+//		if (parameters.isFullAnalysisEnabled()) {
+//			// TODO
+//
+//		// Intra-cluster analysis
+//		} else {
+//			
+//		}
 
-		for (XTrace trace : ProgressBar.wrap(log, pbb)) {
+		for (XTrace trace : log) {
 
 			List<TpmTraceEntry> matchedEventsWithPositions = new ArrayList<>();
-			// TODO replace with XUtils.getConceptName?
-			tracesWithMatchedEvents.put(trace.getAttributes().get(TRACE_NAME_ATTR).toString(), matchedEventsWithPositions);
+			tracesWithMatchedEvents.put(XUtils.getConceptName(trace), matchedEventsWithPositions);
 
 			for (int i = 0, j = 0; i < trace.size(); i++) {
 				
@@ -247,7 +263,7 @@ public class TpmAlgorithm {
 		Map<String, Double> estimationsByTraces = new HashMap<>();
 		
 		LOGGER.info("Starting gathering and filtering transition indicators...");
-		for (Map.Entry<String, List<TpmTraceEntry>> entry : ProgressBar.wrap(tracesWithMatchedEvents.entrySet(), pbb)) {
+		for (Map.Entry<String, List<TpmTraceEntry>> entry : tracesWithMatchedEvents.entrySet()) {
 
 			LOGGER.debug(String.format("Processing trace %s", entry.getKey()));
 
@@ -255,23 +271,26 @@ public class TpmAlgorithm {
 			List<TpmClusterTransitionIndicator> initial = gatherTransitionIndicators(
 					traceEntries, parameters.getFromValue(), parameters.getToValue());
 			List<TpmClusterTransitionIndicator> filtered = selectOptimalTransitions(initial);
-
-			LOGGER.debug("  Initial:");
-			if (!initial.isEmpty()) {
-				for (TpmClusterTransitionIndicator cti : initial) {
-					LOGGER.debug(String.format("    %s", cti.toString()));
-				}
-			} else {
-				LOGGER.debug("    <EMPTY>");
-			}
 			
-			LOGGER.debug("  Filtered:");
-			if (!filtered.isEmpty()) {
-				for (TpmClusterTransitionIndicator cti : filtered) {
-					LOGGER.debug(String.format("    %s", cti.toString()));
+			if (LOGGER.getLevel().isLessSpecificThan(Level.DEBUG)) {
+
+				LOGGER.debug("  Initial:");
+				if (!initial.isEmpty()) {
+					for (TpmClusterTransitionIndicator cti : initial) {
+						LOGGER.debug(String.format("    %s", cti.toString()));
+					}
+				} else {
+					LOGGER.debug("    <EMPTY>");
 				}
-			} else {
-				LOGGER.debug("    <EMPTY>");
+				
+				LOGGER.debug("  Filtered:");
+				if (!filtered.isEmpty()) {
+					for (TpmClusterTransitionIndicator cti : filtered) {
+						LOGGER.debug(String.format("    %s", cti.toString()));
+					}
+				} else {
+					LOGGER.debug("    <EMPTY>");
+				}
 			}
 
 			for (TpmClusterTransitionIndicator cti : filtered) {
@@ -282,14 +301,18 @@ public class TpmAlgorithm {
 						parameters.getMeasurementAttr()) / filtered.size());
 			}
 		}
+		
+		if (LOGGER.getLevel().isLessSpecificThan(Level.DEBUG)) {
 
-		LOGGER.debug("Calculated estimations:");
-		if (!estimationsByTraces.isEmpty()) {
-			for (Map.Entry<String, Double> item : estimationsByTraces.entrySet()) {
-				LOGGER.debug(String.format("  %s: %f", item.getKey(), item.getValue()));
+			LOGGER.debug("Calculated estimations:");
+			if (!estimationsByTraces.isEmpty()) {
+				for (Map.Entry<String, Double> item : estimationsByTraces.entrySet()) {
+					LOGGER.debug(String.format("  %s: %f", item.getKey(), item.getValue()));
+				}
+
+			} else {
+				LOGGER.debug("  <EMPTY>");
 			}
-		} else {
-			LOGGER.debug("  <EMPTY>");
 		}
 
 		TpmMarkedClusterNet mcn = new TpmMarkedClusterNet();
