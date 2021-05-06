@@ -1,6 +1,9 @@
 package org.processmining.plugins.tpm.ui;
 
+import com.fluxicon.slickerbox.components.NiceSlider;
 import com.fluxicon.slickerbox.factory.SlickerFactory;
+
+import com.google.common.collect.Sets;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -10,8 +13,10 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
@@ -21,7 +26,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -30,9 +34,14 @@ import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
+import org.deckfour.xes.classification.XEventClassifier;
+import org.deckfour.xes.classification.XEventAttributeClassifier;
 import org.deckfour.xes.model.XAttribute;
+import org.deckfour.xes.model.XAttributeLiteral;
 import org.deckfour.xes.model.XAttributeTimestamp;
+import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
+import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 
 import org.processmining.plugins.tpm.parameters.TpmParameters;
@@ -48,6 +57,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 	private final TpmParameters parameters;
 	
 	private Map<String, XAttribute> attributesMapping;
+	private Set<Set<String>> fromToUnorderedPairs;
 
 	private JPanel clusterizationPanel, clusterizationDetails, anomaliesPanel;
 
@@ -61,7 +71,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 	
 	private JCheckBox enableAnomaliesDetectionCheckBox;
 	private JLabel anomaliesDetectionThresholdLabel;
-	private JSlider anomaliesDetectionThreshold;
+	private NiceSlider anomaliesDetectionThreshold;
 
 	public TpmClusterizationAndAnomaliesDialog(XLog log, TpmParameters parameters) {
 
@@ -91,7 +101,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		add(anomaliesPanel);	
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "serial" })
 	private void buildClusterizationPanel() {
 
 		clusterizationPanel = SlickerFactory.instance().createRoundedPanel();
@@ -154,6 +164,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		groupingAttributeComboBox = SlickerFactory.instance().createComboBox(attributesMapping.keySet()
 				.toArray(new String[attributesMapping.size()]));
 		groupingAttributeComboBox.setSelectedItem(defaultGroupingAttribute);
+		
 		clusterizationLayoutConstraints.fill = GridBagConstraints.VERTICAL;
 		clusterizationLayoutConstraints.gridx = 0;
 		clusterizationLayoutConstraints.gridy = 1;
@@ -227,10 +238,36 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		clusterizationLayoutConstraints.ipady = 0;
 		clusterizationPanel.add(clusterizationDetails, clusterizationLayoutConstraints);
 		
+		groupingAttributeComboBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				XEventClassifier classifier = new XEventAttributeClassifier(
+						"temporary",
+						new String[]{groupingAttributeComboBox.getSelectedItem().toString()});
+
+				Set<String> uniques = new HashSet<>();
+				for (XTrace trace : log) {
+					for (XEvent event : trace) {
+						uniques.add(classifier.getClassIdentity(event));
+					}
+				}
+
+				fromToUnorderedPairs = Sets.combinations(uniques, 2);
+
+				String[] prefillData = uniques.stream().limit(2).toArray(String[]::new);
+				fromGroupingValueTextField.setText(prefillData[0]);
+				toGroupingValueTextField.setText(prefillData[1]);
+				revalidate();
+				repaint();
+			}
+		});
+		
 		intraClusterModeRadio.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (intraClusterModeRadio.isSelected()) {
+
 					fromGroupingValueTextField.setEditable(true);
 					toGroupingValueTextField.setEditable(true);
 					revalidate();
@@ -243,6 +280,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (fullAnalysisModeRadio.isSelected()) {
+
 					fromGroupingValueTextField.setEditable(false);
 					toGroupingValueTextField.setEditable(false);
 					revalidate();
@@ -250,6 +288,11 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 				}
 			}
 		});
+		
+		// Explicitly triggering an action to pre-populate text fields
+		for (ActionListener a: groupingAttributeComboBox.getActionListeners()) {
+		    a.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null) {});
+		}
 	}
 	
 	private void buildAnomaliesPanel(){
@@ -277,7 +320,8 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		anomaliesLayout.setPosition(anomaliesDetectionThresholdLabel, 0, 1);
 		anomaliesPanel.add(anomaliesDetectionThresholdLabel);
 		
-		anomaliesDetectionThreshold = SlickerFactory.instance().createSlider(JSlider.HORIZONTAL);
+		anomaliesDetectionThreshold = SlickerFactory.instance().createNiceDoubleSlider(
+				"Percentile of valid traces", 0.0, 100.0, 88.0, NiceSlider.Orientation.HORIZONTAL);
 		anomaliesLayout.setPosition(anomaliesDetectionThreshold, 0, 2);
 		anomaliesPanel.add(anomaliesDetectionThreshold);
 	}
@@ -289,6 +333,13 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		parameters.setGroupingAttr(groupingAttr);
 		parameters.setFromValue(new XAttributeLiteralImpl(groupingAttr.getKey(), fromGroupingValueTextField.getText()));
 		parameters.setToValue(new XAttributeLiteralImpl(groupingAttr.getKey(), toGroupingValueTextField.getText()));
+
+		Set<Set<XAttributeLiteral>> convertedPairs = new HashSet<>();
+		for (Set<String> stringPair : fromToUnorderedPairs) {
+			convertedPairs.add(stringPair.stream().map(x -> new XAttributeLiteralImpl(groupingAttr.getKey(), x)).collect(Collectors.toSet()));
+		}
+
+		parameters.setFromToUnorderedPairs(convertedPairs);
 		parameters.setMeasurementAttr((XAttributeTimestamp) attributesMapping.get(measurementAttributeComboBox.getSelectedItem()));
 		parameters.setFullAnalysisEnabled(fullAnalysisModeRadio.isSelected());
 

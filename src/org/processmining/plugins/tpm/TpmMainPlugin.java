@@ -121,6 +121,7 @@ public class TpmMainPlugin extends TpmAlgorithm {
     			new XAttributeLiteralImpl(groupingAttrName, new String()),
     			new XAttributeLiteralImpl(groupingAttrName, fromGroup),
     			new XAttributeLiteralImpl(groupingAttrName, toGroup),
+    			null,
     			new XAttributeTimestampImpl(measurementAttrName, 0),
     			false);
 

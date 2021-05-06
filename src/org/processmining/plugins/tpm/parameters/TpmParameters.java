@@ -1,10 +1,13 @@
 package org.processmining.plugins.tpm.parameters;
 
+import java.util.Set;
+
 import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.model.XAttribute;
 import org.deckfour.xes.model.XAttributeLiteral;
 import org.deckfour.xes.model.XAttributeTimestamp;
 import org.deckfour.xes.model.XLog;
+
 import org.processmining.basicutils.parameters.impl.PluginParametersImpl;
 import org.processmining.log.parameters.ClassifierParameter;
 import org.processmining.log.utils.XUtils;
@@ -12,10 +15,13 @@ import org.processmining.log.utils.XUtils;
 public class TpmParameters extends PluginParametersImpl implements ClassifierParameter {
 
 	private XEventClassifier classifier;
+
 	private XAttribute groupingAttr;
 	// TODO change to Comparable<?>
 	private XAttributeLiteral fromValue;
 	private XAttributeLiteral toValue;
+	private Set<Set<XAttributeLiteral>> fromToUnorderedPairs;
+
 	private XAttributeTimestamp measurementAttr;
 	private boolean fullAnalysisEnabled;
 
@@ -29,6 +35,7 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 			XAttribute groupingAttr,
 			XAttributeLiteral fromValue,
 			XAttributeLiteral toValue,
+			Set<Set<XAttributeLiteral>> fromToUnorderedPairs,
 			XAttributeTimestamp measurementAttr,
 			boolean fullAnalysisEnabled) {
 
@@ -39,6 +46,7 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 		setGroupingAttr(groupingAttr);
 		setFromValue(fromValue);
 		setToValue(toValue);
+		setFromToUnorderedPairs(fromToUnorderedPairs);
 		setMeasurementAttr(measurementAttr);
 		setFullAnalysisEnabled(fullAnalysisEnabled);
 	}
@@ -51,6 +59,7 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 		setGroupingAttr(parameters.getGroupingAttr());
 		setFromValue(parameters.getFromValue());
 		setToValue(parameters.getToValue());
+		setFromToUnorderedPairs(parameters.getFromToUnorderedPairs());
 		setMeasurementAttr(parameters.getMeasurementAttr());
 		setFullAnalysisEnabled(parameters.isFullAnalysisEnabled());
 	}
@@ -99,6 +108,14 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 
 	public void setToValue(XAttributeLiteral toValue) {
 		this.toValue = toValue;
+	}
+	
+	public Set<Set<XAttributeLiteral>> getFromToUnorderedPairs() {
+		return fromToUnorderedPairs;
+	}
+
+	public void setFromToUnorderedPairs(Set<Set<XAttributeLiteral>> fromToUnorderedPairs) {
+		this.fromToUnorderedPairs = fromToUnorderedPairs;
 	}
 	
 	public XAttributeTimestamp getMeasurementAttr() {

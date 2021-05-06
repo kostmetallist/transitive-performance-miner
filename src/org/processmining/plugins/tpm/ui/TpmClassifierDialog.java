@@ -34,7 +34,7 @@ public class TpmClassifierDialog extends TpmWizardStep {
 		double size[][] = { { TableLayoutConstants.FILL }, { TableLayoutConstants.FILL } };
 		setLayout(new TableLayout(size));
 		List<XEventClassifier> availableClassifiers = new ArrayList<XEventClassifier>();
-		availableClassifiers.addAll(log.getClassifiers());
+		availableClassifiers.addAll(XUtils.getStandardAndLogDefinedEventClassifiers(log));
 
 		if (availableClassifiers.isEmpty()) {
 			availableClassifiers.add(new XEventAndClassifier(new XEventNameClassifier(), new XEventLifeTransClassifier()));
@@ -46,7 +46,6 @@ public class TpmClassifierDialog extends TpmWizardStep {
 	
 	public void fillSettings() {
 		if (parameters.getClassifier() == null) {
-			// TODO set classifier by default
 			parameters.setClassifier(XUtils.getDefaultClassifier(log));
 		}
 	}

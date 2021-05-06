@@ -209,14 +209,16 @@ public class TpmAlgorithm {
 			XLog log,
 			TpmParameters parameters) {
 
+		TpmMarkedClusterNet mcn = new TpmMarkedClusterNet();
 		XLogInfo logInfo = XLogInfoFactory.createLogInfo(log, parameters.getClassifier());
-		String groupingAttrName = parameters.getGroupingAttr().getKey();
 
 		LOGGER.info(String.format("Processing log with %d traces and %d events...",
 				logInfo.getNumberOfTraces(), logInfo.getNumberOfEvents()));
 
 		Map<String, List<TpmTraceEntry>> tracesWithMatchedEvents = new HashMap<>();
 		Map<Integer, Integer> globalToLocalIndices = new HashMap<>();
+		String groupingAttrName = parameters.getGroupingAttr().getKey();
+
 //		ProgressBarBuilder pbb = new ProgressBarBuilder();
 //		pbb.setStyle(ProgressBarStyle.ASCII);
  
@@ -314,16 +316,15 @@ public class TpmAlgorithm {
 				LOGGER.debug("  <EMPTY>");
 			}
 		}
-
-		TpmMarkedClusterNet mcn = new TpmMarkedClusterNet();
-		mcn.addCluster(parameters.getFromValue().getValue());
-		mcn.addCluster(parameters.getToValue().getValue());
 		
 		TpmClusterNetEdgeWeightCharacteristic wChar = TpmClusterNetEdgeWeightCharacteristic.createTemporalCharacteristic(
 				estimationsByTraces.values().stream().mapToDouble(x -> x).min().getAsDouble(),
 				estimationsByTraces.values().stream().mapToDouble(x -> x).average().getAsDouble(),
 				estimationsByTraces.values().stream().mapToDouble(x -> x).max().getAsDouble()
 		);
+
+		mcn.addCluster(parameters.getFromValue().getValue());
+		mcn.addCluster(parameters.getToValue().getValue());
 		mcn.addTransition(parameters.getFromValue().getValue(), parameters.getToValue().getValue(), wChar);
 
 		return mcn;
