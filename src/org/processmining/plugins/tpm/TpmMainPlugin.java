@@ -13,8 +13,8 @@ import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.Progress;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
-import org.processmining.plugins.tpm.algorithms.TpmAlgorithm;
 import org.processmining.plugins.tpm.connections.TpmConnection;
+import org.processmining.plugins.tpm.engine.TpmEngine;
 import org.processmining.plugins.tpm.model.TpmMarkedClusterNet;
 import org.processmining.plugins.tpm.parameters.TpmParameters;
 import org.processmining.plugins.tpm.ui.TpmUI;
@@ -25,7 +25,7 @@ import org.processmining.plugins.tpm.ui.TpmUI;
 	    returnLabels = { "Marked Cluster Net" },
 	    returnTypes = { TpmMarkedClusterNet.class },
 	    help = TpmHelpMessage.TEXT)
-public class TpmMainPlugin extends TpmAlgorithm {
+public class TpmMainPlugin {
 	
 	private TpmMarkedClusterNet runConnection(PluginContext context, XLog log,
 			TpmParameters parameters) {
@@ -52,7 +52,9 @@ public class TpmMainPlugin extends TpmAlgorithm {
 
 		progress.setValue(20);
 		progress.setCaption("Performing event log processing...");
-		TpmMarkedClusterNet mcn = this.buildMCN(context, log, parameters);
+		
+		TpmEngine engine = new TpmEngine(log, parameters);
+		TpmMarkedClusterNet mcn = engine.buildMCN();
 
 		if (parameters.isTryConnections()) {
 			context.getConnectionManager().addConnection(

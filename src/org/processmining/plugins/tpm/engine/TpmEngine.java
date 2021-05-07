@@ -1,4 +1,4 @@
-package org.processmining.plugins.tpm.algorithms;
+package org.processmining.plugins.tpm.engine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.deckfour.xes.info.XLogInfo;
 import org.deckfour.xes.info.XLogInfoFactory;
 import org.deckfour.xes.model.XAttribute;
+import org.deckfour.xes.model.XAttributeLiteral;
 import org.deckfour.xes.model.XAttributeTimestamp;
 import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XEvent;
@@ -39,13 +40,23 @@ import org.processmining.plugins.tpm.model.TpmTraceEntry;
 import org.processmining.plugins.tpm.model.weights.TpmClusterNetEdgeWeightCharacteristic;
 import org.processmining.plugins.tpm.parameters.TpmParameters;
 import org.processmining.plugins.tpm.util.TpmPair;
-import org.processmining.framework.plugin.PluginContext;
 
-public class TpmAlgorithm {
+public class TpmEngine {
 	
 	private static final Logger LOGGER = LogManager.getRootLogger();
 	// TODO move to parameters
 	private static final int SOLVER_TIMEOUT = 100;  // in seconds
+	
+	private XLog log;
+	private String groupingAttrName;
+	private TpmParameters parameters;
+	
+	public TpmEngine(XLog log, TpmParameters parameters) {
+
+		this.log = log;
+		this.groupingAttrName = parameters.getGroupingAttr().getKey();
+		this.parameters = parameters;
+	}
 	
 	private static double calculateWeightForIJ(int i, int j) {
 		return 1.0 / (j - i);
@@ -203,32 +214,18 @@ public class TpmAlgorithm {
 		
 		return indicators;
 	}
-
-	public TpmMarkedClusterNet buildMCN(
-			PluginContext context,
-			XLog log,
-			TpmParameters parameters) {
-
-		TpmMarkedClusterNet mcn = new TpmMarkedClusterNet();
-		XLogInfo logInfo = XLogInfoFactory.createLogInfo(log, parameters.getClassifier());
-
-		LOGGER.info(String.format("Processing log with %d traces and %d events...",
-				logInfo.getNumberOfTraces(), logInfo.getNumberOfEvents()));
-
+	
+	private Map<XAttributeLiteral, TpmClusterNetEdgeWeightCharacteristic> calculateWeightCharFromTo(
+			XAttributeLiteral fromValue,
+			XAttributeLiteral toValue,
+			boolean processBidirectionally) {
+		
+		Map<XAttributeLiteral, TpmClusterNetEdgeWeightCharacteristic> result = new HashMap<>();
 		Map<String, List<TpmTraceEntry>> tracesWithMatchedEvents = new HashMap<>();
 		Map<Integer, Integer> globalToLocalIndices = new HashMap<>();
-		String groupingAttrName = parameters.getGroupingAttr().getKey();
-
-//		ProgressBarBuilder pbb = new ProgressBarBuilder();
-//		pbb.setStyle(ProgressBarStyle.ASCII);
- 
-//		if (parameters.isFullAnalysisEnabled()) {
-//			// TODO
-//
-//		// Intra-cluster analysis
-//		} else {
-//			
-//		}
+		
+		LOGGER.debug(String.format("Processing transitions %s -> %s (bidirectional=%b)...",
+				fromValue, toValue, processBidirectionally));
 
 		for (XTrace trace : log) {
 
@@ -241,8 +238,8 @@ public class TpmAlgorithm {
 				XAttributeMap eventAttributes = event.getAttributes();
 				
 				if (eventAttributes.containsKey(groupingAttrName) &&
-						(eventAttributes.get(groupingAttrName).equals(parameters.getFromValue()) ||
-						 eventAttributes.get(groupingAttrName).equals(parameters.getToValue()))) {
+						(eventAttributes.get(groupingAttrName).equals(fromValue) ||
+						 eventAttributes.get(groupingAttrName).equals(toValue))) {
 
 					matchedEventsWithPositions.add(new TpmTraceEntry(event, eventAttributes.get(groupingAttrName), i));
 					globalToLocalIndices.put(i, j++);
@@ -262,70 +259,138 @@ public class TpmAlgorithm {
 			}
 		}
 		
-		Map<String, Double> estimationsByTraces = new HashMap<>();
-		
-		LOGGER.info("Starting gathering and filtering transition indicators...");
-		for (Map.Entry<String, List<TpmTraceEntry>> entry : tracesWithMatchedEvents.entrySet()) {
+		for (int i = 0; i < 2; ++i) {
 
-			LOGGER.debug(String.format("Processing trace %s", entry.getKey()));
+			Map<String, Double> estimationsByTraces = new HashMap<>();
+			
+			LOGGER.info("Starting gathering and filtering transition indicators...");
+			for (Map.Entry<String, List<TpmTraceEntry>> entry : tracesWithMatchedEvents.entrySet()) {
 
-			List<TpmTraceEntry> traceEntries = entry.getValue();
-			List<TpmClusterTransitionIndicator> initial = gatherTransitionIndicators(
-					traceEntries, parameters.getFromValue(), parameters.getToValue());
-			List<TpmClusterTransitionIndicator> filtered = selectOptimalTransitions(initial);
+				LOGGER.debug(String.format("Processing trace %s", entry.getKey()));
+
+				List<TpmTraceEntry> traceEntries = entry.getValue();
+				List<TpmClusterTransitionIndicator> initial;
+				
+				if (i == 0) {
+					initial = gatherTransitionIndicators(traceEntries, fromValue, toValue);
+
+				} else {
+					initial = gatherTransitionIndicators(traceEntries, toValue, fromValue);
+				}
+				
+				List<TpmClusterTransitionIndicator> filtered = selectOptimalTransitions(initial);
+				
+				if (LOGGER.getLevel().isLessSpecificThan(Level.DEBUG)) {
+
+					LOGGER.debug("  Initial:");
+					if (!initial.isEmpty()) {
+						for (TpmClusterTransitionIndicator cti : initial) {
+							LOGGER.debug(String.format("    %s", cti.toString()));
+						}
+					} else {
+						LOGGER.debug("    <EMPTY>");
+					}
+					
+					LOGGER.debug("  Filtered:");
+					if (!filtered.isEmpty()) {
+						for (TpmClusterTransitionIndicator cti : filtered) {
+							LOGGER.debug(String.format("    %s", cti.toString()));
+						}
+					} else {
+						LOGGER.debug("    <EMPTY>");
+					}
+				}
+
+				for (TpmClusterTransitionIndicator cti : filtered) {
+
+					estimationsByTraces.put(entry.getKey(), calculateSliceMeasurement(
+							traceEntries.get(globalToLocalIndices.get(cti.getFromClusterNodeIndex())).getEvent(),
+							traceEntries.get(globalToLocalIndices.get(cti.getToClusterNodeIndex())).getEvent(),
+							parameters.getMeasurementAttr()) / filtered.size());
+				}
+			}
 			
 			if (LOGGER.getLevel().isLessSpecificThan(Level.DEBUG)) {
 
-				LOGGER.debug("  Initial:");
-				if (!initial.isEmpty()) {
-					for (TpmClusterTransitionIndicator cti : initial) {
-						LOGGER.debug(String.format("    %s", cti.toString()));
+				LOGGER.debug("Calculated estimations:");
+				if (!estimationsByTraces.isEmpty()) {
+					for (Map.Entry<String, Double> item : estimationsByTraces.entrySet()) {
+						LOGGER.debug(String.format("  %s: %f", item.getKey(), item.getValue()));
 					}
+
 				} else {
-					LOGGER.debug("    <EMPTY>");
+					LOGGER.debug("  <EMPTY>");
+				}
+			}
+
+			System.out.println(">>>");
+			System.out.println(estimationsByTraces.values().size());
+			estimationsByTraces.values().forEach(System.out::println);
+
+			result.put((i == 0)? fromValue: toValue,
+					   (estimationsByTraces.values().isEmpty())? null:
+						   TpmClusterNetEdgeWeightCharacteristic.createTemporalCharacteristic(
+							   estimationsByTraces.values().stream().mapToDouble(x -> x).min().getAsDouble(),
+							   estimationsByTraces.values().stream().mapToDouble(x -> x).average().getAsDouble(),
+							   estimationsByTraces.values().stream().mapToDouble(x -> x).max().getAsDouble()
+			));
+		}
+		
+		return result;
+	}
+
+	public TpmMarkedClusterNet buildMCN() {
+
+		TpmMarkedClusterNet mcn = new TpmMarkedClusterNet();
+		XLogInfo logInfo = XLogInfoFactory.createLogInfo(log, parameters.getClassifier());
+
+		LOGGER.info(String.format("Processing log with %d traces and %d events...",
+				logInfo.getNumberOfTraces(), logInfo.getNumberOfEvents()));
+ 
+		if (parameters.isFullAnalysisEnabled()) {
+			
+			ProgressBarBuilder pbb = new ProgressBarBuilder();
+			pbb.setStyle(ProgressBarStyle.ASCII);
+
+			for (Set<XAttributeLiteral> pair : ProgressBar.wrap(parameters.getFromToUnorderedPairs(), pbb)) {
+
+				int i = 0;
+				XAttributeLiteral fromAttr = null, toAttr = null;
+
+				for (XAttributeLiteral attribute : pair) {
+					if (i++ == 0) {
+						fromAttr = attribute;
+					} else {
+						toAttr = attribute;
+					}
 				}
 				
-				LOGGER.debug("  Filtered:");
-				if (!filtered.isEmpty()) {
-					for (TpmClusterTransitionIndicator cti : filtered) {
-						LOGGER.debug(String.format("    %s", cti.toString()));
-					}
-				} else {
-					LOGGER.debug("    <EMPTY>");
+				Map<XAttributeLiteral, TpmClusterNetEdgeWeightCharacteristic> wChars =
+						calculateWeightCharFromTo(fromAttr, toAttr, true);
+				
+				mcn.addCluster(fromAttr.getValue());
+				mcn.addCluster(toAttr.getValue());
+				
+				if (wChars.get(fromAttr) != null) {
+					mcn.addTransition(fromAttr.getValue(), toAttr.getValue(), wChars.get(fromAttr));
+				}
+				
+				if (wChars.get(toAttr) != null) {
+					mcn.addTransition(toAttr.getValue(), fromAttr.getValue(), wChars.get(toAttr));
 				}
 			}
 
-			for (TpmClusterTransitionIndicator cti : filtered) {
+		// Intra-cluster analysis
+		} else {
 
-				estimationsByTraces.put(entry.getKey(), calculateSliceMeasurement(
-						traceEntries.get(globalToLocalIndices.get(cti.getFromClusterNodeIndex())).getEvent(),
-						traceEntries.get(globalToLocalIndices.get(cti.getToClusterNodeIndex())).getEvent(),
-						parameters.getMeasurementAttr()) / filtered.size());
-			}
+			XAttributeLiteral fromAttr = parameters.getFromValue(),
+					toAttr = parameters.getToValue();
+
+			mcn.addCluster(fromAttr.getValue());
+			mcn.addCluster(toAttr.getValue());
+			mcn.addTransition(fromAttr.getValue(), toAttr.getValue(), calculateWeightCharFromTo(
+					fromAttr, toAttr, false).get(fromAttr));
 		}
-		
-		if (LOGGER.getLevel().isLessSpecificThan(Level.DEBUG)) {
-
-			LOGGER.debug("Calculated estimations:");
-			if (!estimationsByTraces.isEmpty()) {
-				for (Map.Entry<String, Double> item : estimationsByTraces.entrySet()) {
-					LOGGER.debug(String.format("  %s: %f", item.getKey(), item.getValue()));
-				}
-
-			} else {
-				LOGGER.debug("  <EMPTY>");
-			}
-		}
-		
-		TpmClusterNetEdgeWeightCharacteristic wChar = TpmClusterNetEdgeWeightCharacteristic.createTemporalCharacteristic(
-				estimationsByTraces.values().stream().mapToDouble(x -> x).min().getAsDouble(),
-				estimationsByTraces.values().stream().mapToDouble(x -> x).average().getAsDouble(),
-				estimationsByTraces.values().stream().mapToDouble(x -> x).max().getAsDouble()
-		);
-
-		mcn.addCluster(parameters.getFromValue().getValue());
-		mcn.addCluster(parameters.getToValue().getValue());
-		mcn.addTransition(parameters.getFromValue().getValue(), parameters.getToValue().getValue(), wChar);
 
 		return mcn;
 	}
