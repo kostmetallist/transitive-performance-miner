@@ -221,16 +221,20 @@ public class TpmEngine {
 			boolean processBidirectionally) {
 		
 		Map<XAttributeLiteral, TpmClusterNetEdgeWeightCharacteristic> result = new HashMap<>();
-		Map<String, List<TpmTraceEntry>> tracesWithMatchedEvents = new HashMap<>();
-		Map<Integer, Integer> globalToLocalIndices = new HashMap<>();
-		
+		Map<String, List<TpmTraceEntry>> matchedEventsByTrace = new HashMap<>();
+		// Global to local indices mapping
+		Map<String, Map<Integer, Integer>> g2lIndicesByTrace = new HashMap<>();
+
 		LOGGER.debug(String.format("Processing transitions %s -> %s (bidirectional=%b)...",
 				fromValue, toValue, processBidirectionally));
 
 		for (XTrace trace : log) {
 
 			List<TpmTraceEntry> matchedEventsWithPositions = new ArrayList<>();
-			tracesWithMatchedEvents.put(XUtils.getConceptName(trace), matchedEventsWithPositions);
+			matchedEventsByTrace.put(XUtils.getConceptName(trace), matchedEventsWithPositions);
+			
+			Map<Integer, Integer> indicesMapping = new HashMap<>();
+			g2lIndicesByTrace.put(XUtils.getConceptName(trace), indicesMapping);
 
 			for (int i = 0, j = 0; i < trace.size(); i++) {
 				
@@ -242,7 +246,7 @@ public class TpmEngine {
 						 eventAttributes.get(groupingAttrName).equals(toValue))) {
 
 					matchedEventsWithPositions.add(new TpmTraceEntry(event, eventAttributes.get(groupingAttrName), i));
-					globalToLocalIndices.put(i, j++);
+					indicesMapping.put(i, j++);
 				}
 			}
 		}
@@ -250,7 +254,7 @@ public class TpmEngine {
 		if (LOGGER.getLevel().isLessSpecificThan(Level.DEBUG)) {
 
 			LOGGER.debug("Dumping collected events:");
-			for (Map.Entry<String, List<TpmTraceEntry>> entry : tracesWithMatchedEvents.entrySet()) {
+			for (Map.Entry<String, List<TpmTraceEntry>> entry : matchedEventsByTrace.entrySet()) {
 
 				LOGGER.debug(String.format("For trace %s", entry.getKey()));
 				for (TpmTraceEntry traceEntry : entry.getValue()) {
@@ -259,17 +263,19 @@ public class TpmEngine {
 			}
 		}
 		
-		for (int i = 0; i < 2; ++i) {
+		for (int i = 0; i < (processBidirectionally? 2: 1); ++i) {
 
 			Map<String, Double> estimationsByTraces = new HashMap<>();
 			
 			LOGGER.info("Starting gathering and filtering transition indicators...");
-			for (Map.Entry<String, List<TpmTraceEntry>> entry : tracesWithMatchedEvents.entrySet()) {
+			for (Map.Entry<String, List<TpmTraceEntry>> entry : matchedEventsByTrace.entrySet()) {
 
-				LOGGER.debug(String.format("Processing trace %s", entry.getKey()));
-
+				String traceId = entry.getKey();
+				Map<Integer, Integer> indicesMapping = g2lIndicesByTrace.get(traceId);
 				List<TpmTraceEntry> traceEntries = entry.getValue();
 				List<TpmClusterTransitionIndicator> initial;
+
+				LOGGER.debug(String.format("Processing trace %s", traceId));
 				
 				if (i == 0) {
 					initial = gatherTransitionIndicators(traceEntries, fromValue, toValue);
@@ -303,9 +309,9 @@ public class TpmEngine {
 
 				for (TpmClusterTransitionIndicator cti : filtered) {
 
-					estimationsByTraces.put(entry.getKey(), calculateSliceMeasurement(
-							traceEntries.get(globalToLocalIndices.get(cti.getFromClusterNodeIndex())).getEvent(),
-							traceEntries.get(globalToLocalIndices.get(cti.getToClusterNodeIndex())).getEvent(),
+					estimationsByTraces.put(traceId, calculateSliceMeasurement(
+							traceEntries.get(indicesMapping.get(cti.getFromClusterNodeIndex())).getEvent(),
+							traceEntries.get(indicesMapping.get(cti.getToClusterNodeIndex())).getEvent(),
 							parameters.getMeasurementAttr()) / filtered.size());
 				}
 			}
@@ -377,7 +383,7 @@ public class TpmEngine {
 				
 				if (wChars.get(toAttr) != null) {
 					mcn.addTransition(toAttr.getValue(), fromAttr.getValue(), wChars.get(toAttr));
-				}
+				}				
 			}
 
 		// Intra-cluster analysis
