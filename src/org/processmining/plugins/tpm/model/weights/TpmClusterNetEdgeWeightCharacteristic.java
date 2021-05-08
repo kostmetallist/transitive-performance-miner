@@ -137,27 +137,27 @@ public class TpmClusterNetEdgeWeightCharacteristic {
 			
 			if (startedCollecting) {
 				switch (tUnit) {
-				case DAYS:
-					result.add(0, new TpmPair<>(TimeUnit.DAYS, unit.toDays(rounded)));
-					break;
-				case HOURS:
-					result.add(0, new TpmPair<>(TimeUnit.HOURS, unit.toHours(rounded)));
-					break;
-				case MINUTES:
-					result.add(0, new TpmPair<>(TimeUnit.MINUTES, unit.toMinutes(rounded)));
-					break;
-				case SECONDS:
-					result.add(0, new TpmPair<>(TimeUnit.SECONDS, unit.toSeconds(rounded)));
-					break;
-				case MILLISECONDS:
-					result.add(0, new TpmPair<>(TimeUnit.MILLISECONDS, unit.toMillis(rounded)));
-					break;
-				case MICROSECONDS:
-					result.add(0, new TpmPair<>(TimeUnit.MICROSECONDS, unit.toMicros(rounded)));
-					break;
-				case NANOSECONDS:
-					result.add(0, new TpmPair<>(TimeUnit.NANOSECONDS, unit.toNanos(rounded)));
-					break;
+					case DAYS:
+						result.add(0, new TpmPair<>(TimeUnit.DAYS, unit.toDays(rounded)));
+						break;
+					case HOURS:
+						result.add(0, new TpmPair<>(TimeUnit.HOURS, unit.toHours(rounded)));
+						break;
+					case MINUTES:
+						result.add(0, new TpmPair<>(TimeUnit.MINUTES, unit.toMinutes(rounded)));
+						break;
+					case SECONDS:
+						result.add(0, new TpmPair<>(TimeUnit.SECONDS, unit.toSeconds(rounded)));
+						break;
+					case MILLISECONDS:
+						result.add(0, new TpmPair<>(TimeUnit.MILLISECONDS, unit.toMillis(rounded)));
+						break;
+					case MICROSECONDS:
+						result.add(0, new TpmPair<>(TimeUnit.MICROSECONDS, unit.toMicros(rounded)));
+						break;
+					case NANOSECONDS:
+						result.add(0, new TpmPair<>(TimeUnit.NANOSECONDS, unit.toNanos(rounded)));
+						break;
 				}
 			}
 		}

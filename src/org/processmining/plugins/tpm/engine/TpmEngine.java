@@ -87,13 +87,17 @@ public class TpmEngine {
 		if (data.keySet().isEmpty()) {
 			return result;
 		}
-				
+
 		double mean = data.values().stream().mapToDouble(x -> x).average().getAsDouble();
 		double sigma = Math.sqrt(data.values().stream().mapToDouble(x -> Math.pow(x - mean, 2)).sum() / data.size());
 
 		for (Entry<String, Double> entry : data.entrySet()) {
 
 			double value = entry.getValue();
+			
+			LOGGER.debug(String.format("Checking for %.2f < %.2f < %.2f",
+					mean - 3 * sigma, value, mean + 3 * sigma));
+			
 			if (value > (mean - 3 * sigma) && value < (mean + 3 * sigma)) {
 				result.put(entry.getKey(), value);
 			}
@@ -121,6 +125,10 @@ public class TpmEngine {
 		for (Entry<String, Double> entry : data.entrySet()) {
 
 			double value = entry.getValue();
+
+			LOGGER.debug(String.format("Checking for %.2f < %.2f < %.2f",
+					p25 - adjustedIQR, value, p75 + adjustedIQR));
+
 			if (value > (p25 - adjustedIQR) && value < (p75 + adjustedIQR)) {
 				result.put(entry.getKey(), value);
 			}
@@ -166,7 +174,7 @@ public class TpmEngine {
 				LOGGER.debug(String.format("  From %d:", nodeIndex));
 				for (TpmClusterTransitionIndicator cti : outgoing.get(nodeIndex)) {
 
-					LOGGER.debug(String.format("    %s:", cti));
+					LOGGER.debug(String.format("    %s", cti));
 				}
 			}
 			
@@ -176,7 +184,7 @@ public class TpmEngine {
 				LOGGER.debug(String.format("  To %d:", nodeIndex));
 				for (TpmClusterTransitionIndicator cti : ingoing.get(nodeIndex)) {
 
-					LOGGER.debug(String.format("    %s:", cti));
+					LOGGER.debug(String.format("    %s", cti));
 				}
 			}
 		}
@@ -276,8 +284,8 @@ public class TpmEngine {
 		// Global to local indices mapping
 		Map<String, Map<Integer, Integer>> g2lIndicesByTrace = new HashMap<>();
 
-		LOGGER.debug(String.format("Processing transitions %s -> %s (bidirectional=%b)...",
-				fromValue, toValue, processBidirectionally));
+		LOGGER.info(String.format("Processing transitions %s %s %s...",
+				fromValue, processBidirectionally? "<->": "->", toValue));
 
 		for (XTrace trace : log) {
 
@@ -316,9 +324,12 @@ public class TpmEngine {
 		
 		for (int i = 0; i < (processBidirectionally? 2: 1); ++i) {
 
-			Map<String, Double> estimationsByTraces = new HashMap<>();
-			
-			LOGGER.info("Starting gathering and filtering transition indicators...");
+			Map<String, Double> estimationsByTraces = new HashMap<>();			
+			LOGGER.info(String.format(
+					"Launching gathering and filtering transition indicators for (%s -> %s)...",
+					(i == 0)? fromValue: toValue,
+					(i == 0)? toValue: fromValue));
+
 			for (Map.Entry<String, List<TpmTraceEntry>> entry : matchedEventsByTrace.entrySet()) {
 
 				String traceId = entry.getKey();
@@ -365,24 +376,24 @@ public class TpmEngine {
 							traceEntries.get(indicesMapping.get(cti.getToClusterNodeIndex())).getEvent(),
 							parameters.getMeasurementAttr()) / filtered.size());
 				}
+			}
+			
+			if (parameters.isAnomaliesDetectionEnabled()
+				&& estimationsByTraces.size() >= anomaliesDetectionMinDataItems) {
 				
-				if (parameters.isAnomaliesDetectionEnabled()
-					&& estimationsByTraces.size() >= anomaliesDetectionMinDataItems) {
-					
-					int beforeFiltration = estimationsByTraces.size();
+				int beforeFiltration = estimationsByTraces.size();
 
-					switch (parameters.getAnomaliesDetectionMethod()) {
+				switch (parameters.getAnomaliesDetectionMethod()) {
 					case THREE_SIGMA:
 						estimationsByTraces = filterThreeSigmaRange(estimationsByTraces);
 						break;
 					case INTER_QUARTILE:
 						estimationsByTraces = filterIQRRange(estimationsByTraces);
 						break;
-					}
-
-					LOGGER.debug(String.format("Anomalies detection has thrown away %d cases",
-							beforeFiltration - estimationsByTraces.size()));
 				}
+
+				LOGGER.debug(String.format("Anomalies detection has thrown away %d cases",
+						beforeFiltration - estimationsByTraces.size()));
 			}
 			
 			if (LOGGER.getLevel().isLessSpecificThan(Level.DEBUG)) {

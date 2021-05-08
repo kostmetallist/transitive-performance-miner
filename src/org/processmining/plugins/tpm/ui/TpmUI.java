@@ -66,28 +66,27 @@ public class TpmUI {
 			ws.fillSettings();
 			
 			switch (result) {
-
-			case NEXT:
-				go(WizardDirection.NEXT);
-				break;
-
-			case PREV:
-				go(WizardDirection.PREV);
-				break;
-
-			case FINISHED:
-				LOGGER.info(String.format("parameters.classifier      : %s", parameters.getClassifier()));
-				LOGGER.info(String.format("parameters.groupingAttr    : %s", parameters.getGroupingAttr().getKey()));
-				LOGGER.info(String.format("parameters.fromValue       : %s", parameters.getFromValue()));
-				LOGGER.info(String.format("parameters.toValue         : %s", parameters.getToValue()));
-				LOGGER.info(String.format("parameters.measurementAttr : %s", parameters.getMeasurementAttr().getKey()));
-
-				return parameters;
-
-			default:
-				context.getFutureResult(0).cancel(true);
-				context.getFutureResult(1).cancel(true);
-				return null;
+				case NEXT:
+					go(WizardDirection.NEXT);
+					break;
+	
+				case PREV:
+					go(WizardDirection.PREV);
+					break;
+	
+				case FINISHED:
+					LOGGER.info(String.format("parameters.classifier      : %s", parameters.getClassifier()));
+					LOGGER.info(String.format("parameters.groupingAttr    : %s", parameters.getGroupingAttr().getKey()));
+					LOGGER.info(String.format("parameters.fromValue       : %s", parameters.getFromValue()));
+					LOGGER.info(String.format("parameters.toValue         : %s", parameters.getToValue()));
+					LOGGER.info(String.format("parameters.measurementAttr : %s", parameters.getMeasurementAttr().getKey()));
+	
+					return parameters;
+	
+				default:
+					context.getFutureResult(0).cancel(true);
+					context.getFutureResult(1).cancel(true);
+					return null;
 			}
 		}
 	}
