@@ -1,16 +1,20 @@
 # Compiled class file
+
 *.class
 
-# Log file
+
+# Log files
+
 *.log
 
+
 # BlueJ files
+
 *.ctxt
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
 
-# Package Files #
+# Package Files
+
 *.jar
 !/jar/*.jar
 *.war
@@ -20,11 +24,20 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+
+# Virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+
 hs_err_pid*
+
+
+# Output artifacts and third-party items
 
 /bin/
 /bindist/
 /dist/
 /ivy/
+
+
+# (Presumably) for large external resource files
+
 /resource/ignored/

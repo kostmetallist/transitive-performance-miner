@@ -75,11 +75,15 @@ public class TpmUI {
 					break;
 	
 				case FINISHED:
-					LOGGER.info(String.format("parameters.classifier      : %s", parameters.getClassifier()));
-					LOGGER.info(String.format("parameters.groupingAttr    : %s", parameters.getGroupingAttr().getKey()));
-					LOGGER.info(String.format("parameters.fromValue       : %s", parameters.getFromValue()));
-					LOGGER.info(String.format("parameters.toValue         : %s", parameters.getToValue()));
-					LOGGER.info(String.format("parameters.measurementAttr : %s", parameters.getMeasurementAttr().getKey()));
+					LOGGER.info(String.format("parameters.classifier                : %s", parameters.getClassifier()));
+					LOGGER.info(String.format("parameters.groupingAttr              : %s", parameters.getGroupingAttr().getKey()));
+					LOGGER.info(String.format("parameters.fullAnalysisEnabled       : %s", parameters.isFullAnalysisEnabled()));
+					LOGGER.info(String.format("parameters.fromValue                 : %s", parameters.getFromValue()));
+					LOGGER.info(String.format("parameters.toValue                   : %s", parameters.getToValue()));
+					LOGGER.info(String.format("parameters.measurementAttr           : %s", parameters.getMeasurementAttr().getKey()));
+					LOGGER.info(String.format("parameters.solverTimeout             : %s", parameters.getSolverTimeout()));
+					LOGGER.info(String.format("parameters.anomaliesDetectionEnabled : %s", parameters.isAnomaliesDetectionEnabled()));
+					LOGGER.info(String.format("parameters.anomaliesDetectionMethod  : %s", parameters.getAnomaliesDetectionMethod().name()));
 	
 					return parameters;
 	

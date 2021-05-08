@@ -188,7 +188,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		clusterizationLayoutConstraints.gridy = 3;
 		clusterizationPanel.add(measurementAttributeComboBox, clusterizationLayoutConstraints);
 		
-		solverTimeoutLabel = SlickerFactory.instance().createLabel("  Solver timeout (s):");
+		solverTimeoutLabel = SlickerFactory.instance().createLabel("  Solver timeout (in seconds):");
 		clusterizationLayoutConstraints.fill = GridBagConstraints.VERTICAL;
 		clusterizationLayoutConstraints.gridx = 0;
 		clusterizationLayoutConstraints.gridy = 4;

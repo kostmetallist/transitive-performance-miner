@@ -324,9 +324,11 @@ public class TpmEngine {
 		
 		for (int i = 0; i < (processBidirectionally? 2: 1); ++i) {
 
-			Map<String, Double> estimationsByTraces = new HashMap<>();			
+			Map<String, Double> estimationsByTraces = new HashMap<>();
+			long measurementsPerformed = 0;
+
 			LOGGER.info(String.format(
-					"Launching gathering and filtering transition indicators for (%s -> %s)...",
+					"Preparing for gathering and filtering transition indicators for (%s -> %s)...",
 					(i == 0)? fromValue: toValue,
 					(i == 0)? toValue: fromValue));
 
@@ -338,7 +340,7 @@ public class TpmEngine {
 				List<TpmClusterTransitionIndicator> initial;
 
 				LOGGER.debug(String.format("Processing trace %s", traceId));
-				
+
 				if (i == 0) {
 					initial = gatherTransitionIndicators(traceEntries, fromValue, toValue);
 
@@ -369,6 +371,8 @@ public class TpmEngine {
 					}
 				}
 
+				LOGGER.debug(String.format("Collecting measurements for %d graph edges...", filtered.size()));
+
 				for (TpmClusterTransitionIndicator cti : filtered) {
 
 					estimationsByTraces.put(traceId, calculateSliceMeasurement(
@@ -376,12 +380,15 @@ public class TpmEngine {
 							traceEntries.get(indicesMapping.get(cti.getToClusterNodeIndex())).getEvent(),
 							parameters.getMeasurementAttr()) / filtered.size());
 				}
+
+				measurementsPerformed += filtered.size();
 			}
 			
+			long beforeFiltration = estimationsByTraces.size(),
+					afterFiltration = estimationsByTraces.size();
+
 			if (parameters.isAnomaliesDetectionEnabled()
 				&& estimationsByTraces.size() >= anomaliesDetectionMinDataItems) {
-				
-				int beforeFiltration = estimationsByTraces.size();
 
 				switch (parameters.getAnomaliesDetectionMethod()) {
 					case THREE_SIGMA:
@@ -392,8 +399,9 @@ public class TpmEngine {
 						break;
 				}
 
+				afterFiltration = estimationsByTraces.size();
 				LOGGER.debug(String.format("Anomalies detection has thrown away %d cases",
-						beforeFiltration - estimationsByTraces.size()));
+						beforeFiltration - afterFiltration));
 			}
 			
 			if (LOGGER.getLevel().isLessSpecificThan(Level.DEBUG)) {
@@ -409,9 +417,8 @@ public class TpmEngine {
 				}
 			}
 
-//			LOGGER.debug("Estimations by traces info:");
-//			LOGGER.debug(estimationsByTraces.values().size());
-//			estimationsByTraces.values().forEach(System.out::println);
+			LOGGER.info(String.format("Totally monitored %d/%d cases and made %d measurements",
+					afterFiltration, beforeFiltration, measurementsPerformed));
 
 			result.put((i == 0)? fromValue: toValue,
 					   (estimationsByTraces.values().isEmpty())? null:
@@ -432,7 +439,8 @@ public class TpmEngine {
 
 		LOGGER.info(String.format("Processing log with %d traces and %d events...",
 				logInfo.getNumberOfTraces(), logInfo.getNumberOfEvents()));
- 
+		
+		long startTime = System.nanoTime();
 		if (parameters.isFullAnalysisEnabled()) {
 			
 			ProgressBarBuilder pbb = new ProgressBarBuilder();
@@ -481,6 +489,7 @@ public class TpmEngine {
 			}
 		}
 
+		LOGGER.info(String.format("Analysis has taken %.3f ms", (System.nanoTime() - startTime) / 1_000_000.0));
 		return mcn;
 	}
 }
