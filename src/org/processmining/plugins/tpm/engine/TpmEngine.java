@@ -1,10 +1,12 @@
 package org.processmining.plugins.tpm.engine;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import me.tongfei.progressbar.ProgressBar;
@@ -44,6 +46,8 @@ import org.processmining.plugins.tpm.util.TpmPair;
 public class TpmEngine {
 	
 	private static final Logger LOGGER = LogManager.getRootLogger();
+	// TODO transit to parameters
+	private static int anomaliesDetectionMinDataItems = 1;
 	
 	private XLog log;
 	private String groupingAttrName;
@@ -74,6 +78,55 @@ public class TpmEngine {
 		long toTs = XUtils.getTimestamp(to).getTime();
 
 		return toTs - fromTs;
+	}
+	
+	private static Map<String, Double> filterThreeSigmaRange(Map<String, Double> data) {
+
+		Map<String, Double> result = new HashMap<>();
+
+		if (data.keySet().isEmpty()) {
+			return result;
+		}
+				
+		double mean = data.values().stream().mapToDouble(x -> x).average().getAsDouble();
+		double sigma = Math.sqrt(data.values().stream().mapToDouble(x -> Math.pow(x - mean, 2)).sum() / data.size());
+
+		for (Entry<String, Double> entry : data.entrySet()) {
+
+			double value = entry.getValue();
+			if (value > (mean - 3 * sigma) && value < (mean + 3 * sigma)) {
+				result.put(entry.getKey(), value);
+			}
+		}
+		
+		return result;
+	}
+	
+	private static Map<String, Double> filterIQRRange(Map<String, Double> data) {
+
+		Map<String, Double> result = new HashMap<>();
+
+		if (data.keySet().isEmpty()) {
+			return result;
+		}
+
+		List<Double> values = new ArrayList<>(data.values());
+		Collections.sort(values);
+
+		double p25 = values.get((int) Math.ceil(.25 * values.size())),
+				p75 = values.get((int) Math.ceil(.75 * values.size()));
+
+		double adjustedIQR = 1.5 * (p75 - p25);
+		
+		for (Entry<String, Double> entry : data.entrySet()) {
+
+			double value = entry.getValue();
+			if (value > (p25 - adjustedIQR) && value < (p75 + adjustedIQR)) {
+				result.put(entry.getKey(), value);
+			}
+		}
+		
+		return result;
 	}
 	
 	private TpmPair<Map<Integer, List<TpmClusterTransitionIndicator>>,
@@ -311,6 +364,24 @@ public class TpmEngine {
 							traceEntries.get(indicesMapping.get(cti.getFromClusterNodeIndex())).getEvent(),
 							traceEntries.get(indicesMapping.get(cti.getToClusterNodeIndex())).getEvent(),
 							parameters.getMeasurementAttr()) / filtered.size());
+				}
+				
+				if (parameters.isAnomaliesDetectionEnabled()
+					&& estimationsByTraces.size() >= anomaliesDetectionMinDataItems) {
+					
+					int beforeFiltration = estimationsByTraces.size();
+
+					switch (parameters.getAnomaliesDetectionMethod()) {
+					case THREE_SIGMA:
+						estimationsByTraces = filterThreeSigmaRange(estimationsByTraces);
+						break;
+					case INTER_QUARTILE:
+						estimationsByTraces = filterIQRRange(estimationsByTraces);
+						break;
+					}
+
+					LOGGER.debug(String.format("Anomalies detection has thrown away %d cases",
+							beforeFiltration - estimationsByTraces.size()));
 				}
 			}
 			
