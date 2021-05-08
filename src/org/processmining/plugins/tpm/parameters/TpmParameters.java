@@ -32,6 +32,7 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 	private boolean fullAnalysisEnabled;
 
 	private AnomaliesDetectionMethod anomaliesDetectionMethod;
+	private int anomaliesDetectionMinDataItems;
 	private boolean anomaliesDetectionEnabled;
 
 	public TpmParameters() {
@@ -49,6 +50,7 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 			int solverTimeout,
 			boolean fullAnalysisEnabled,
 			AnomaliesDetectionMethod anomaliesDetectionMethod,
+			int anomaliesDetectionMinDataItems,
 			boolean anomaliesDetectionEnabled) {
 
 		super();
@@ -63,8 +65,9 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 		setMeasurementAttr(measurementAttr);
 		setSolverTimeout(solverTimeout);
 		setFullAnalysisEnabled(fullAnalysisEnabled);
-		
+
 		setAnomaliesDetectionMethod(anomaliesDetectionMethod);
+		setAnomaliesDetectionMinDataItems(anomaliesDetectionMinDataItems);
 		setAnomaliesDetectionEnabled(anomaliesDetectionEnabled);
 	}
 
@@ -83,6 +86,7 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 		setFullAnalysisEnabled(parameters.isFullAnalysisEnabled());
 
 		setAnomaliesDetectionMethod(parameters.getAnomaliesDetectionMethod());
+		setAnomaliesDetectionMinDataItems(parameters.getAnomaliesDetectionMinDataItems());
 		setAnomaliesDetectionEnabled(parameters.isAnomaliesDetectionEnabled());
 	}
 
@@ -98,6 +102,7 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 					&& getSolverTimeout() == parameters.getSolverTimeout()
 					&& isFullAnalysisEnabled() == parameters.isFullAnalysisEnabled()
 					&& getAnomaliesDetectionMethod().equals(parameters.getAnomaliesDetectionMethod())
+					&& getAnomaliesDetectionMinDataItems() == parameters.getAnomaliesDetectionMinDataItems()
 					&& isAnomaliesDetectionEnabled() == parameters.isAnomaliesDetectionEnabled();
 		}
 		return false;
@@ -175,6 +180,14 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 		this.anomaliesDetectionMethod = anomaliesDetectionMethod;
 	}
 	
+	public int getAnomaliesDetectionMinDataItems() {
+		return anomaliesDetectionMinDataItems;
+	}
+
+	public void setAnomaliesDetectionMinDataItems(int anomaliesDetectionMinDataItems) {
+		this.anomaliesDetectionMinDataItems = anomaliesDetectionMinDataItems;
+	}
+
 	public boolean isAnomaliesDetectionEnabled() {
 		return anomaliesDetectionEnabled;
 	}

@@ -9,6 +9,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -76,6 +77,8 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 	private JCheckBox enableAnomaliesDetectionCheckBox;
 	private JRadioButton anomaliesDetectionThreeSigmaRadio, anomaliesDetectionInterQuartileRadio;
 	private ButtonGroup anomaliesDetectionModesButtons;
+	private JLabel minCasesPerTransitionForAnomalyDetectionLabel;
+	private JSpinner minCasesPerTransitionForAnomalyDetectionSpinner;
 
 	public TpmClusterizationAndAnomaliesDialog(XLog log, TpmParameters parameters) {
 
@@ -88,8 +91,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 
 		TpmScrollableGridLayout rootLayout = new TpmScrollableGridLayout(this, 2, 4, 0, 0);
 		rootLayout.setRowFixed(0, true);
-		// TODO investigate changes
-//		rootLayout.setRowFixed(1, true);
+		rootLayout.setRowFixed(1, true);
 		this.setLayout(rootLayout);
 
 		JLabel headerLabel = SlickerFactory.instance().createLabel("<html><h2>Clusterization and Anomalies</h2>");
@@ -312,6 +314,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		}
 	}
 	
+	@SuppressWarnings("serial")
 	private void buildAnomaliesPanel(){
 
 		anomaliesPanel = SlickerFactory.instance().createRoundedPanel();
@@ -323,37 +326,48 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 				TitledBorder.DEFAULT_JUSTIFICATION,
 				TitledBorder.CENTER,
 				new Font(Font.SANS_SERIF, Font.BOLD, 14)));
-	
-		TpmScrollableGridLayout anomaliesLayout = new TpmScrollableGridLayout(anomaliesPanel, 1, 3, 0, 0);
-		anomaliesLayout.setRowFixed(0, true);
-		anomaliesLayout.setRowFixed(1, true);
+		
+		GridBagLayout anomaliesLayout = new GridBagLayout();
+		GridBagConstraints anomaliesLayoutConstraints = new GridBagConstraints();
 		anomaliesPanel.setLayout(anomaliesLayout);
 		
 		enableAnomaliesDetectionCheckBox = SlickerFactory.instance().createCheckBox("Enable anomalies detection", true);
 		enableAnomaliesDetectionCheckBox.setSelected(false);
-		anomaliesLayout.setPosition(enableAnomaliesDetectionCheckBox, 0, 0);
-		anomaliesPanel.add(enableAnomaliesDetectionCheckBox);
-		
-		// TODO change to Greek sigma
+		anomaliesLayoutConstraints.fill = GridBagConstraints.VERTICAL;
+		anomaliesLayoutConstraints.gridx = 0;
+		anomaliesLayoutConstraints.gridy = 0;
+		anomaliesLayoutConstraints.anchor = GridBagConstraints.LINE_START;
+		anomaliesPanel.add(enableAnomaliesDetectionCheckBox, anomaliesLayoutConstraints);
+
 		anomaliesDetectionThreeSigmaRadio = SlickerFactory.instance().createRadioButton("3σ area selection");
-		anomaliesDetectionThreeSigmaRadio.setBorder(BorderFactory.createEmptyBorder(15, 20, 0, 0));
-		anomaliesDetectionThreeSigmaRadio.setEnabled(false);
-		anomaliesDetectionThreeSigmaRadio.setVisible(false);
 		anomaliesDetectionThreeSigmaRadio.setSelected(true);
-		anomaliesLayout.setPosition(anomaliesDetectionThreeSigmaRadio, 0, 1);
-		anomaliesPanel.add(anomaliesDetectionThreeSigmaRadio);
+		anomaliesLayoutConstraints.gridx = 0;
+		anomaliesLayoutConstraints.gridy = 1;
+		anomaliesLayoutConstraints.weightx = 0.3;
+		anomaliesLayoutConstraints.insets = new Insets(15, 15, 5, 0);
+		anomaliesPanel.add(anomaliesDetectionThreeSigmaRadio, anomaliesLayoutConstraints);
 		
 		anomaliesDetectionInterQuartileRadio = SlickerFactory.instance().createRadioButton("Inter-quartile range selection");
-		anomaliesDetectionInterQuartileRadio.setBorder(BorderFactory.createEmptyBorder(15, 20, 0, 0));
-		anomaliesDetectionInterQuartileRadio.setEnabled(false);
-		anomaliesDetectionInterQuartileRadio.setVisible(false);
 		anomaliesDetectionInterQuartileRadio.setSelected(false);
-		anomaliesLayout.setPosition(anomaliesDetectionInterQuartileRadio, 0, 2);
-		anomaliesPanel.add(anomaliesDetectionInterQuartileRadio);
+		anomaliesLayoutConstraints.gridx = 0;
+		anomaliesLayoutConstraints.gridy = 2;
+		anomaliesPanel.add(anomaliesDetectionInterQuartileRadio, anomaliesLayoutConstraints);
 		
 		anomaliesDetectionModesButtons = new ButtonGroup();
 		anomaliesDetectionModesButtons.add(anomaliesDetectionThreeSigmaRadio);
 		anomaliesDetectionModesButtons.add(anomaliesDetectionInterQuartileRadio);
+		
+		minCasesPerTransitionForAnomalyDetectionLabel = SlickerFactory.instance().createLabel(
+				"<html><body>Min number of cases per cluster transition<br>to apply anomalies detection:<body></html>");
+		anomaliesLayoutConstraints.gridx = 1;
+		anomaliesLayoutConstraints.gridy = 1;
+		anomaliesPanel.add(minCasesPerTransitionForAnomalyDetectionLabel, anomaliesLayoutConstraints);
+		
+		minCasesPerTransitionForAnomalyDetectionSpinner = new JSpinner(new SpinnerNumberModel(100, 1, Integer.MAX_VALUE, 1));
+		minCasesPerTransitionForAnomalyDetectionSpinner.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 15));
+		anomaliesLayoutConstraints.gridx = 1;
+		anomaliesLayoutConstraints.gridy = 2;
+		anomaliesPanel.add(minCasesPerTransitionForAnomalyDetectionSpinner, anomaliesLayoutConstraints);
 		
 		enableAnomaliesDetectionCheckBox.addActionListener(new ActionListener() {
 			@Override
@@ -361,22 +375,31 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 				if (enableAnomaliesDetectionCheckBox.isSelected()) {
 
 					anomaliesDetectionThreeSigmaRadio.setEnabled(true);
-					anomaliesDetectionThreeSigmaRadio.setVisible(true);
+					anomaliesDetectionThreeSigmaRadio.setForeground(Color.BLACK);
 					anomaliesDetectionInterQuartileRadio.setEnabled(true);
-					anomaliesDetectionInterQuartileRadio.setVisible(true);
+					anomaliesDetectionInterQuartileRadio.setForeground(Color.BLACK);
+					minCasesPerTransitionForAnomalyDetectionLabel.setEnabled(true);
+					minCasesPerTransitionForAnomalyDetectionSpinner.setEnabled(true);
 
 				} else {
+
 					anomaliesDetectionThreeSigmaRadio.setEnabled(false);
-					anomaliesDetectionThreeSigmaRadio.setVisible(false);
+					anomaliesDetectionThreeSigmaRadio.setForeground(Color.GRAY);
 					anomaliesDetectionInterQuartileRadio.setEnabled(false);
-					anomaliesDetectionInterQuartileRadio.setVisible(false);
-					
+					anomaliesDetectionInterQuartileRadio.setForeground(Color.GRAY);
+					minCasesPerTransitionForAnomalyDetectionLabel.setEnabled(false);
+					minCasesPerTransitionForAnomalyDetectionSpinner.setEnabled(false);					
 				}
-				
+
 				revalidate();
 				repaint();
 			}
 		});
+		
+		// Explicitly triggering an action to deactivate components
+		for (ActionListener a: enableAnomaliesDetectionCheckBox.getActionListeners()) {
+		    a.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null) {});
+		}
 	}
 
 	public void fillSettings() {
@@ -399,6 +422,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 
 		parameters.setAnomaliesDetectionMethod((anomaliesDetectionThreeSigmaRadio.isEnabled())?
 				TpmParameters.AnomaliesDetectionMethod.THREE_SIGMA: TpmParameters.AnomaliesDetectionMethod.INTER_QUARTILE);
+		parameters.setAnomaliesDetectionMinDataItems((int) minCasesPerTransitionForAnomalyDetectionSpinner.getValue());
 		parameters.setAnomaliesDetectionEnabled(enableAnomaliesDetectionCheckBox.isSelected());
 	}
 }

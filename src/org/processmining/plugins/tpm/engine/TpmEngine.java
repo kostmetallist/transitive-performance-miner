@@ -46,8 +46,6 @@ import org.processmining.plugins.tpm.util.TpmPair;
 public class TpmEngine {
 	
 	private static final Logger LOGGER = LogManager.getRootLogger();
-	// TODO transit to parameters
-	private static int anomaliesDetectionMinDataItems = 1;
 	
 	private XLog log;
 	private String groupingAttrName;
@@ -388,7 +386,7 @@ public class TpmEngine {
 					afterFiltration = estimationsByTraces.size();
 
 			if (parameters.isAnomaliesDetectionEnabled()
-				&& estimationsByTraces.size() >= anomaliesDetectionMinDataItems) {
+				&& estimationsByTraces.size() >= parameters.getAnomaliesDetectionMinDataItems()) {
 
 				switch (parameters.getAnomaliesDetectionMethod()) {
 					case THREE_SIGMA:
