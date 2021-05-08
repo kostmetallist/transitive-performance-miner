@@ -335,7 +335,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		anomaliesPanel.add(enableAnomaliesDetectionCheckBox);
 		
 		// TODO change to Greek sigma
-		anomaliesDetectionThreeSigmaRadio = SlickerFactory.instance().createRadioButton("3-sigma area selection");
+		anomaliesDetectionThreeSigmaRadio = SlickerFactory.instance().createRadioButton("3σ area selection");
 		anomaliesDetectionThreeSigmaRadio.setBorder(BorderFactory.createEmptyBorder(15, 20, 0, 0));
 		anomaliesDetectionThreeSigmaRadio.setEnabled(false);
 		anomaliesDetectionThreeSigmaRadio.setVisible(false);

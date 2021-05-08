@@ -327,9 +327,9 @@ public class TpmEngine {
 				}
 			}
 
-			System.out.println(">>>");
-			System.out.println(estimationsByTraces.values().size());
-			estimationsByTraces.values().forEach(System.out::println);
+//			LOGGER.debug("Estimations by traces info:");
+//			LOGGER.debug(estimationsByTraces.values().size());
+//			estimationsByTraces.values().forEach(System.out::println);
 
 			result.put((i == 0)? fromValue: toValue,
 					   (estimationsByTraces.values().isEmpty())? null:
@@ -389,11 +389,14 @@ public class TpmEngine {
 
 			XAttributeLiteral fromAttr = parameters.getFromValue(),
 					toAttr = parameters.getToValue();
+			TpmClusterNetEdgeWeightCharacteristic wChar = calculateWeightCharFromTo(
+					fromAttr, toAttr, false).get(fromAttr);
 
 			mcn.addCluster(fromAttr.getValue());
 			mcn.addCluster(toAttr.getValue());
-			mcn.addTransition(fromAttr.getValue(), toAttr.getValue(), calculateWeightCharFromTo(
-					fromAttr, toAttr, false).get(fromAttr));
+			if (wChar != null) {
+				mcn.addTransition(fromAttr.getValue(), toAttr.getValue(), wChar);
+			}
 		}
 
 		return mcn;
