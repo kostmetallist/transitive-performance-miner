@@ -2,8 +2,6 @@ package org.processmining.plugins.tpm;
 
 import java.util.Collection;
 
-import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
-import org.deckfour.xes.model.impl.XAttributeTimestampImpl;
 import org.deckfour.xes.model.XLog;
 
 import org.processmining.contexts.uitopia.UIPluginContext;
@@ -27,7 +25,9 @@ import org.processmining.plugins.tpm.ui.TpmUI;
 	    help = TpmHelpMessage.TEXT)
 public class TpmMainPlugin {
 	
-	private TpmMarkedClusterNet runConnection(PluginContext context, XLog log,
+	private TpmMarkedClusterNet runConnection(
+			PluginContext context,
+			XLog log,
 			TpmParameters parameters) {
 
 		Progress progress = context.getProgress();
@@ -65,7 +65,16 @@ public class TpmMainPlugin {
 		progress.setCaption("Done!");
 		return mcn;
 	}
-	
+
+	/**
+     * Constructs a marked cluster net for given log in an interactive mode.
+     * 
+     * @param context
+     * 		  UI plug-in context to pass forward to underlying methods
+     * 
+     * @param log
+     * 		  An instance of {@code XLog}
+     */
 	@UITopiaVariant(
 			affiliation = "ISPRAS",
 	        author = "Konstantin Kukushkin",
@@ -81,6 +90,18 @@ public class TpmMainPlugin {
         return runConnection(context, log, parameters);
     }
 
+	/**
+     * Constructs a marked cluster net for given log and parameters.
+     * 
+     * @param context
+     * 		  Plug-in context to pass forward to underlying methods
+     * 
+     * @param log
+     * 		  An instance of {@code XLog}
+     * 
+     * @param parameters
+     * 		  {@code TpmParameters} class object to get mandatory analysis settings
+     */
 	@UITopiaVariant(
 			affiliation = "ISPRAS",
 	        author = "Konstantin Kukushkin",
@@ -92,41 +113,5 @@ public class TpmMainPlugin {
     		final TpmParameters parameters) {
 
         return runConnection(context, log, parameters);
-    }
-
-    /**
-     * Constructs a bare-bones cluster net without any edges between items.
-     * 
-     * @param context
-     * 		  Plug-in context to pass forward to underlying methods
-     * 
-     * @param log
-     * 		  An instance of {@code XLog}
-     */
-    @UITopiaVariant(
-    	affiliation = "ISPRAS",
-        author = "Konstantin Kukushkin",
-        email = "kukushkin@ispras.ru")
-    @PluginVariant(requiredParameterLabels = { 0 })
-    public TpmMarkedClusterNet run(
-    		final PluginContext context,
-    		final XLog log) {
-
-    	// TODO setup with extensions
-    	String groupingAttrName = "org:resource";
-    	String fromGroup = "Pete";
-    	String toGroup = "Sara";
-    	String measurementAttrName = "time:timestamp";
-
-    	TpmParameters parameters = new TpmParameters(
-    			log,
-    			new XAttributeLiteralImpl(groupingAttrName, new String()),
-    			new XAttributeLiteralImpl(groupingAttrName, fromGroup),
-    			new XAttributeLiteralImpl(groupingAttrName, toGroup),
-    			null,
-    			new XAttributeTimestampImpl(measurementAttrName, 0),
-    			false);
-
-        return run(context, log, parameters);
     }
 }

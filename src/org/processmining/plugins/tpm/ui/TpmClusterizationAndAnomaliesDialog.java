@@ -1,6 +1,5 @@
 package org.processmining.plugins.tpm.ui;
 
-import com.fluxicon.slickerbox.components.NiceSlider;
 import com.fluxicon.slickerbox.factory.SlickerFactory;
 
 import com.google.common.collect.Sets;
@@ -26,7 +25,9 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
@@ -63,15 +64,18 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 
 	private JComboBox<String> groupingAttributeComboBox, measurementAttributeComboBox;
 
-	private JLabel groupingAttributeLabel, fromGroupingValueLabel, toGroupingValueLabel, measurementAttributeLabel;
+	private JLabel groupingAttributeLabel, fromGroupingValueLabel, toGroupingValueLabel,
+			measurementAttributeLabel, solverTimeoutLabel;
 	private JTextField fromGroupingValueTextField, toGroupingValueTextField;
+	
+	private JSpinner solverTimeoutSpinner;
 	
 	private JRadioButton intraClusterModeRadio, fullAnalysisModeRadio;
 	private ButtonGroup clusterizationModeButtons;
 	
 	private JCheckBox enableAnomaliesDetectionCheckBox;
-	private JLabel anomaliesDetectionThresholdLabel;
-	private NiceSlider anomaliesDetectionThreshold;
+	private JRadioButton anomaliesDetectionThreeSigmaRadio, anomaliesDetectionInterQuartileRadio;
+	private ButtonGroup anomaliesDetectionModesButtons;
 
 	public TpmClusterizationAndAnomaliesDialog(XLog log, TpmParameters parameters) {
 
@@ -183,6 +187,19 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		clusterizationLayoutConstraints.gridx = 0;
 		clusterizationLayoutConstraints.gridy = 3;
 		clusterizationPanel.add(measurementAttributeComboBox, clusterizationLayoutConstraints);
+		
+		solverTimeoutLabel = SlickerFactory.instance().createLabel("  Solver timeout (s):");
+		clusterizationLayoutConstraints.fill = GridBagConstraints.VERTICAL;
+		clusterizationLayoutConstraints.gridx = 0;
+		clusterizationLayoutConstraints.gridy = 4;
+		clusterizationPanel.add(solverTimeoutLabel, clusterizationLayoutConstraints);
+
+		solverTimeoutSpinner = new JSpinner(new SpinnerNumberModel(120, 30, 1800, 30));
+		solverTimeoutSpinner.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 5));
+		clusterizationLayoutConstraints.fill = GridBagConstraints.VERTICAL;
+		clusterizationLayoutConstraints.gridx = 0;
+		clusterizationLayoutConstraints.gridy = 5;
+		clusterizationPanel.add(solverTimeoutSpinner, clusterizationLayoutConstraints);
 		
 		clusterizationDetails = SlickerFactory.instance().createRoundedPanel();
 		clusterizationDetails.setBorder(BorderFactory.createTitledBorder(
@@ -313,17 +330,53 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		anomaliesPanel.setLayout(anomaliesLayout);
 		
 		enableAnomaliesDetectionCheckBox = SlickerFactory.instance().createCheckBox("Enable anomalies detection", true);
+		enableAnomaliesDetectionCheckBox.setSelected(false);
 		anomaliesLayout.setPosition(enableAnomaliesDetectionCheckBox, 0, 0);
 		anomaliesPanel.add(enableAnomaliesDetectionCheckBox);
 		
-		anomaliesDetectionThresholdLabel = SlickerFactory.instance().createLabel("Anomalies relative value threshold");
-		anomaliesLayout.setPosition(anomaliesDetectionThresholdLabel, 0, 1);
-		anomaliesPanel.add(anomaliesDetectionThresholdLabel);
+		// TODO change to Greek sigma
+		anomaliesDetectionThreeSigmaRadio = SlickerFactory.instance().createRadioButton("3-sigma area selection");
+		anomaliesDetectionThreeSigmaRadio.setBorder(BorderFactory.createEmptyBorder(15, 20, 0, 0));
+		anomaliesDetectionThreeSigmaRadio.setEnabled(false);
+		anomaliesDetectionThreeSigmaRadio.setVisible(false);
+		anomaliesDetectionThreeSigmaRadio.setSelected(true);
+		anomaliesLayout.setPosition(anomaliesDetectionThreeSigmaRadio, 0, 1);
+		anomaliesPanel.add(anomaliesDetectionThreeSigmaRadio);
 		
-		anomaliesDetectionThreshold = SlickerFactory.instance().createNiceDoubleSlider(
-				"Percentile of valid traces", 0.0, 100.0, 88.0, NiceSlider.Orientation.HORIZONTAL);
-		anomaliesLayout.setPosition(anomaliesDetectionThreshold, 0, 2);
-		anomaliesPanel.add(anomaliesDetectionThreshold);
+		anomaliesDetectionInterQuartileRadio = SlickerFactory.instance().createRadioButton("Inter-quartile range selection");
+		anomaliesDetectionInterQuartileRadio.setBorder(BorderFactory.createEmptyBorder(15, 20, 0, 0));
+		anomaliesDetectionInterQuartileRadio.setEnabled(false);
+		anomaliesDetectionInterQuartileRadio.setVisible(false);
+		anomaliesDetectionInterQuartileRadio.setSelected(false);
+		anomaliesLayout.setPosition(anomaliesDetectionInterQuartileRadio, 0, 2);
+		anomaliesPanel.add(anomaliesDetectionInterQuartileRadio);
+		
+		anomaliesDetectionModesButtons = new ButtonGroup();
+		anomaliesDetectionModesButtons.add(anomaliesDetectionThreeSigmaRadio);
+		anomaliesDetectionModesButtons.add(anomaliesDetectionInterQuartileRadio);
+		
+		enableAnomaliesDetectionCheckBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (enableAnomaliesDetectionCheckBox.isSelected()) {
+
+					anomaliesDetectionThreeSigmaRadio.setEnabled(true);
+					anomaliesDetectionThreeSigmaRadio.setVisible(true);
+					anomaliesDetectionInterQuartileRadio.setEnabled(true);
+					anomaliesDetectionInterQuartileRadio.setVisible(true);
+
+				} else {
+					anomaliesDetectionThreeSigmaRadio.setEnabled(false);
+					anomaliesDetectionThreeSigmaRadio.setVisible(false);
+					anomaliesDetectionInterQuartileRadio.setEnabled(false);
+					anomaliesDetectionInterQuartileRadio.setVisible(false);
+					
+				}
+				
+				revalidate();
+				repaint();
+			}
+		});
 	}
 
 	public void fillSettings() {
@@ -341,10 +394,11 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 
 		parameters.setFromToUnorderedPairs(convertedPairs);
 		parameters.setMeasurementAttr((XAttributeTimestamp) attributesMapping.get(measurementAttributeComboBox.getSelectedItem()));
+		parameters.setSolverTimeout((int) solverTimeoutSpinner.getValue());
 		parameters.setFullAnalysisEnabled(fullAnalysisModeRadio.isSelected());
 
-		if (enableAnomaliesDetectionCheckBox.isSelected()) {
-			// TODO stuff
-		}
+		parameters.setAnomaliesDetectionMethod((anomaliesDetectionThreeSigmaRadio.isEnabled())?
+				TpmParameters.AnomaliesDetectionMethod.THREE_SIGMA: TpmParameters.AnomaliesDetectionMethod.INTER_QUARTILE);
+		parameters.setAnomaliesDetectionEnabled(enableAnomaliesDetectionCheckBox.isSelected());
 	}
 }

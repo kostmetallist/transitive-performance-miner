@@ -44,8 +44,6 @@ import org.processmining.plugins.tpm.util.TpmPair;
 public class TpmEngine {
 	
 	private static final Logger LOGGER = LogManager.getRootLogger();
-	// TODO move to parameters
-	private static final int SOLVER_TIMEOUT = 100;  // in seconds
 	
 	private XLog log;
 	private String groupingAttrName;
@@ -140,7 +138,7 @@ public class TpmEngine {
 		
 		SolverFactory factory = new SolverFactoryLpSolve();
 		factory.setParameter(Solver.VERBOSE, 0);
-		factory.setParameter(Solver.TIMEOUT, SOLVER_TIMEOUT);
+		factory.setParameter(Solver.TIMEOUT, parameters.getSolverTimeout());
 
 		Linear target = new Linear();
 		Problem problem = new Problem();

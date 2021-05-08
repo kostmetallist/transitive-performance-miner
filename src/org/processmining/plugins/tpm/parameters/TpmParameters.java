@@ -13,6 +13,11 @@ import org.processmining.log.parameters.ClassifierParameter;
 import org.processmining.log.utils.XUtils;
 
 public class TpmParameters extends PluginParametersImpl implements ClassifierParameter {
+	
+	public static enum AnomaliesDetectionMethod {
+		THREE_SIGMA,
+		INTER_QUARTILE,
+	}
 
 	private XEventClassifier classifier;
 
@@ -23,7 +28,11 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 	private Set<Set<XAttributeLiteral>> fromToUnorderedPairs;
 
 	private XAttributeTimestamp measurementAttr;
+	private int solverTimeout; // in seconds
 	private boolean fullAnalysisEnabled;
+
+	private AnomaliesDetectionMethod anomaliesDetectionMethod;
+	private boolean anomaliesDetectionEnabled;
 
 	public TpmParameters() {
 		super();
@@ -37,7 +46,10 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 			XAttributeLiteral toValue,
 			Set<Set<XAttributeLiteral>> fromToUnorderedPairs,
 			XAttributeTimestamp measurementAttr,
-			boolean fullAnalysisEnabled) {
+			int solverTimeout,
+			boolean fullAnalysisEnabled,
+			AnomaliesDetectionMethod anomaliesDetectionMethod,
+			boolean anomaliesDetectionEnabled) {
 
 		super();
 		setClassifier(XUtils.getDefaultClassifier(log));
@@ -47,8 +59,13 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 		setFromValue(fromValue);
 		setToValue(toValue);
 		setFromToUnorderedPairs(fromToUnorderedPairs);
+		
 		setMeasurementAttr(measurementAttr);
+		setSolverTimeout(solverTimeout);
 		setFullAnalysisEnabled(fullAnalysisEnabled);
+		
+		setAnomaliesDetectionMethod(anomaliesDetectionMethod);
+		setAnomaliesDetectionEnabled(anomaliesDetectionEnabled);
 	}
 
 	public TpmParameters(TpmParameters parameters) {
@@ -60,8 +77,13 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 		setFromValue(parameters.getFromValue());
 		setToValue(parameters.getToValue());
 		setFromToUnorderedPairs(parameters.getFromToUnorderedPairs());
+
 		setMeasurementAttr(parameters.getMeasurementAttr());
+		setSolverTimeout(parameters.getSolverTimeout());
 		setFullAnalysisEnabled(parameters.isFullAnalysisEnabled());
+
+		setAnomaliesDetectionMethod(parameters.getAnomaliesDetectionMethod());
+		setAnomaliesDetectionEnabled(parameters.isAnomaliesDetectionEnabled());
 	}
 
 	public boolean equals(Object object) {
@@ -73,7 +95,10 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 					&& getFromValue().equals(parameters.getFromValue())
 					&& getToValue().equals(parameters.getToValue())
 					&& getMeasurementAttr().equals(parameters.getMeasurementAttr())
-					&& isFullAnalysisEnabled() == parameters.isFullAnalysisEnabled();
+					&& getSolverTimeout() == parameters.getSolverTimeout()
+					&& isFullAnalysisEnabled() == parameters.isFullAnalysisEnabled()
+					&& getAnomaliesDetectionMethod().equals(parameters.getAnomaliesDetectionMethod())
+					&& isAnomaliesDetectionEnabled() == parameters.isAnomaliesDetectionEnabled();
 		}
 		return false;
 	}
@@ -126,11 +151,35 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 		this.measurementAttr = measurementAttr;
 	}
 	
+	public int getSolverTimeout() {
+		return solverTimeout;
+	}
+
+	public void setSolverTimeout(int solverTimeout) {
+		this.solverTimeout = solverTimeout;
+	}
+	
 	public boolean isFullAnalysisEnabled() {
 		return fullAnalysisEnabled;
 	}
 
 	public void setFullAnalysisEnabled(boolean fullAnalysisEnabled) {
 		this.fullAnalysisEnabled = fullAnalysisEnabled;
+	}
+	
+	public AnomaliesDetectionMethod getAnomaliesDetectionMethod() {
+		return anomaliesDetectionMethod;
+	}
+
+	public void setAnomaliesDetectionMethod(AnomaliesDetectionMethod anomaliesDetectionMethod) {
+		this.anomaliesDetectionMethod = anomaliesDetectionMethod;
+	}
+	
+	public boolean isAnomaliesDetectionEnabled() {
+		return anomaliesDetectionEnabled;
+	}
+
+	public void setAnomaliesDetectionEnabled(boolean anomaliesDetectionEnabled) {
+		this.anomaliesDetectionEnabled = anomaliesDetectionEnabled;
 	}
 }
