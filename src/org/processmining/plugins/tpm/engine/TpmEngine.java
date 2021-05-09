@@ -287,9 +287,27 @@ public class TpmEngine {
 
 		for (XTrace trace : log) {
 
-			List<TpmTraceEntry> matchedEventsWithPositions = new ArrayList<>();
-			matchedEventsByTrace.put(XUtils.getConceptName(trace), matchedEventsWithPositions);
+//			List<TpmTraceEntry> matchedEventsWithPositions = new ArrayList<>();
+//			matchedEventsByTrace.put(XUtils.getConceptName(trace), matchedEventsWithPositions);
+//			
+//			Map<Integer, Integer> indicesMapping = new HashMap<>();
+//			g2lIndicesByTrace.put(XUtils.getConceptName(trace), indicesMapping);
+//
+//			for (int i = 0, j = 0; i < trace.size(); i++) {
+//				
+//				XEvent event = trace.get(i);
+//				XAttributeMap eventAttributes = event.getAttributes();
+//				
+//				if (eventAttributes.containsKey(groupingAttrName) &&
+//						(eventAttributes.get(groupingAttrName).equals(fromValue) ||
+//						 eventAttributes.get(groupingAttrName).equals(toValue))) {
+//
+//					matchedEventsWithPositions.add(new TpmTraceEntry(event, eventAttributes.get(groupingAttrName), i));
+//					indicesMapping.put(i, j++);
+//				}
+//			}
 			
+			List<TpmTraceEntry> matchedEventsWithPositions = new ArrayList<>();
 			Map<Integer, Integer> indicesMapping = new HashMap<>();
 			g2lIndicesByTrace.put(XUtils.getConceptName(trace), indicesMapping);
 
@@ -305,6 +323,10 @@ public class TpmEngine {
 					matchedEventsWithPositions.add(new TpmTraceEntry(event, eventAttributes.get(groupingAttrName), i));
 					indicesMapping.put(i, j++);
 				}
+			}
+			
+			if (!matchedEventsWithPositions.isEmpty()) {
+				matchedEventsByTrace.put(XUtils.getConceptName(trace), matchedEventsWithPositions);
 			}
 		}
 
