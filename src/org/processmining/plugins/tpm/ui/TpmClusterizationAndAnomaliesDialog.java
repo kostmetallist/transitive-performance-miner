@@ -444,7 +444,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		parameters.setTrivialAnalysis(isTrivialAnalysisExpected);
 		parameters.setFullAnalysisEnabled(fullAnalysisModeRadio.isSelected());
 
-		parameters.setAnomaliesDetectionMethod((anomaliesDetectionThreeSigmaRadio.isEnabled())?
+		parameters.setAnomaliesDetectionMethod((anomaliesDetectionThreeSigmaRadio.isSelected())?
 				TpmParameters.AnomaliesDetectionMethod.THREE_SIGMA: TpmParameters.AnomaliesDetectionMethod.INTER_QUARTILE);
 		parameters.setAnomaliesDetectionMinDataItems((int) minCasesPerTransitionForAnomalyDetectionSpinner.getValue());
 		parameters.setAnomaliesDetectionEnabled(enableAnomaliesDetectionCheckBox.isSelected());
