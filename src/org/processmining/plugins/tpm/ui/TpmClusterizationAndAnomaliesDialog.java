@@ -60,6 +60,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 	
 	private Map<String, XAttribute> attributesMapping;
 	private Set<Set<String>> fromToUnorderedPairs;
+	private boolean isTrivialAnalysisExpected = false;
 
 	private JPanel clusterizationPanel, clusterizationDetails, anomaliesPanel;
 
@@ -272,9 +273,24 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 					}
 				}
 
-				fromToUnorderedPairs = Sets.combinations(uniques, 2);
+				String[] prefillData = new String[2];
 
-				String[] prefillData = uniques.stream().limit(2).toArray(String[]::new);
+				if (uniques.size() < 2) {
+
+					isTrivialAnalysisExpected = true;
+					fromToUnorderedPairs = null;
+					
+					String valueToFill = (uniques.isEmpty())? "UNDEFINED": uniques.stream().limit(1).toArray(String[]::new)[0];
+					prefillData[0] = prefillData[1] = valueToFill;
+
+				} else {
+
+					isTrivialAnalysisExpected = false;
+					fromToUnorderedPairs = Sets.combinations(uniques, 2);
+
+					prefillData = uniques.stream().limit(2).toArray(String[]::new);
+				}
+
 				fromGroupingValueTextField.setText(prefillData[0]);
 				toGroupingValueTextField.setText(prefillData[1]);
 				revalidate();
@@ -410,14 +426,22 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		parameters.setFromValue(new XAttributeLiteralImpl(groupingAttr.getKey(), fromGroupingValueTextField.getText()));
 		parameters.setToValue(new XAttributeLiteralImpl(groupingAttr.getKey(), toGroupingValueTextField.getText()));
 
-		Set<Set<XAttributeLiteral>> convertedPairs = new HashSet<>();
-		for (Set<String> stringPair : fromToUnorderedPairs) {
-			convertedPairs.add(stringPair.stream().map(x -> new XAttributeLiteralImpl(groupingAttr.getKey(), x)).collect(Collectors.toSet()));
+		if (fromToUnorderedPairs == null) {
+			parameters.setFromToUnorderedPairs(null);
+
+		} else {
+
+			Set<Set<XAttributeLiteral>> convertedPairs = new HashSet<>();
+			for (Set<String> stringPair : fromToUnorderedPairs) {
+				convertedPairs.add(stringPair.stream().map(x -> new XAttributeLiteralImpl(groupingAttr.getKey(), x)).collect(Collectors.toSet()));
+			}
+
+			parameters.setFromToUnorderedPairs(convertedPairs);
 		}
 
-		parameters.setFromToUnorderedPairs(convertedPairs);
 		parameters.setMeasurementAttr((XAttributeTimestamp) attributesMapping.get(measurementAttributeComboBox.getSelectedItem()));
 		parameters.setSolverTimeout((int) solverTimeoutSpinner.getValue());
+		parameters.setTrivialAnalysis(isTrivialAnalysisExpected);
 		parameters.setFullAnalysisEnabled(fullAnalysisModeRadio.isSelected());
 
 		parameters.setAnomaliesDetectionMethod((anomaliesDetectionThreeSigmaRadio.isEnabled())?

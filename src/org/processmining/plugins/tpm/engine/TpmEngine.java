@@ -439,51 +439,57 @@ public class TpmEngine {
 				logInfo.getNumberOfTraces(), logInfo.getNumberOfEvents()));
 		
 		long startTime = System.nanoTime();
-		if (parameters.isFullAnalysisEnabled()) {
-			
-			ProgressBarBuilder pbb = new ProgressBarBuilder();
-			pbb.setStyle(ProgressBarStyle.ASCII);
+		
+		if (parameters.isTrivialAnalysis()) {
+			mcn.addCluster(parameters.getFromValue().getValue());
 
-			for (Set<XAttributeLiteral> pair : ProgressBar.wrap(parameters.getFromToUnorderedPairs(), pbb)) {
+		} else {
+			if (parameters.isFullAnalysisEnabled()) {
+				
+				ProgressBarBuilder pbb = new ProgressBarBuilder();
+				pbb.setStyle(ProgressBarStyle.ASCII);
 
-				int i = 0;
-				XAttributeLiteral fromAttr = null, toAttr = null;
+				for (Set<XAttributeLiteral> pair : ProgressBar.wrap(parameters.getFromToUnorderedPairs(), pbb)) {
 
-				for (XAttributeLiteral attribute : pair) {
-					if (i++ == 0) {
-						fromAttr = attribute;
-					} else {
-						toAttr = attribute;
+					int i = 0;
+					XAttributeLiteral fromAttr = null, toAttr = null;
+
+					for (XAttributeLiteral attribute : pair) {
+						if (i++ == 0) {
+							fromAttr = attribute;
+						} else {
+							toAttr = attribute;
+						}
 					}
+					
+					Map<XAttributeLiteral, TpmClusterNetEdgeWeightCharacteristic> wChars =
+							calculateWeightCharFromTo(fromAttr, toAttr, true);
+					
+					mcn.addCluster(fromAttr.getValue());
+					mcn.addCluster(toAttr.getValue());
+					
+					if (wChars.get(fromAttr) != null) {
+						mcn.addTransition(fromAttr.getValue(), toAttr.getValue(), wChars.get(fromAttr));
+					}
+					
+					if (wChars.get(toAttr) != null) {
+						mcn.addTransition(toAttr.getValue(), fromAttr.getValue(), wChars.get(toAttr));
+					}				
 				}
-				
-				Map<XAttributeLiteral, TpmClusterNetEdgeWeightCharacteristic> wChars =
-						calculateWeightCharFromTo(fromAttr, toAttr, true);
-				
+
+			// Intra-cluster analysis
+			} else {
+
+				XAttributeLiteral fromAttr = parameters.getFromValue(),
+						toAttr = parameters.getToValue();
+				TpmClusterNetEdgeWeightCharacteristic wChar = calculateWeightCharFromTo(
+						fromAttr, toAttr, false).get(fromAttr);
+
 				mcn.addCluster(fromAttr.getValue());
 				mcn.addCluster(toAttr.getValue());
-				
-				if (wChars.get(fromAttr) != null) {
-					mcn.addTransition(fromAttr.getValue(), toAttr.getValue(), wChars.get(fromAttr));
+				if (wChar != null) {
+					mcn.addTransition(fromAttr.getValue(), toAttr.getValue(), wChar);
 				}
-				
-				if (wChars.get(toAttr) != null) {
-					mcn.addTransition(toAttr.getValue(), fromAttr.getValue(), wChars.get(toAttr));
-				}				
-			}
-
-		// Intra-cluster analysis
-		} else {
-
-			XAttributeLiteral fromAttr = parameters.getFromValue(),
-					toAttr = parameters.getToValue();
-			TpmClusterNetEdgeWeightCharacteristic wChar = calculateWeightCharFromTo(
-					fromAttr, toAttr, false).get(fromAttr);
-
-			mcn.addCluster(fromAttr.getValue());
-			mcn.addCluster(toAttr.getValue());
-			if (wChar != null) {
-				mcn.addTransition(fromAttr.getValue(), toAttr.getValue(), wChar);
 			}
 		}
 

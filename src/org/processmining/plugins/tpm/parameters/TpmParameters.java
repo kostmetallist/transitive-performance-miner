@@ -30,6 +30,7 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 	private XAttributeTimestamp measurementAttr;
 	private int solverTimeout; // in seconds
 	private boolean fullAnalysisEnabled;
+	private boolean isTrivialAnalysis;
 
 	private AnomaliesDetectionMethod anomaliesDetectionMethod;
 	private int anomaliesDetectionMinDataItems;
@@ -49,6 +50,7 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 			XAttributeTimestamp measurementAttr,
 			int solverTimeout,
 			boolean fullAnalysisEnabled,
+			boolean isTrivialAnalysis,
 			AnomaliesDetectionMethod anomaliesDetectionMethod,
 			int anomaliesDetectionMinDataItems,
 			boolean anomaliesDetectionEnabled) {
@@ -65,6 +67,7 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 		setMeasurementAttr(measurementAttr);
 		setSolverTimeout(solverTimeout);
 		setFullAnalysisEnabled(fullAnalysisEnabled);
+		setTrivialAnalysis(isTrivialAnalysis);
 
 		setAnomaliesDetectionMethod(anomaliesDetectionMethod);
 		setAnomaliesDetectionMinDataItems(anomaliesDetectionMinDataItems);
@@ -84,6 +87,7 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 		setMeasurementAttr(parameters.getMeasurementAttr());
 		setSolverTimeout(parameters.getSolverTimeout());
 		setFullAnalysisEnabled(parameters.isFullAnalysisEnabled());
+		setTrivialAnalysis(parameters.isTrivialAnalysis());
 
 		setAnomaliesDetectionMethod(parameters.getAnomaliesDetectionMethod());
 		setAnomaliesDetectionMinDataItems(parameters.getAnomaliesDetectionMinDataItems());
@@ -101,6 +105,7 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 					&& getMeasurementAttr().equals(parameters.getMeasurementAttr())
 					&& getSolverTimeout() == parameters.getSolverTimeout()
 					&& isFullAnalysisEnabled() == parameters.isFullAnalysisEnabled()
+					&& isTrivialAnalysis() == parameters.isTrivialAnalysis()
 					&& getAnomaliesDetectionMethod().equals(parameters.getAnomaliesDetectionMethod())
 					&& getAnomaliesDetectionMinDataItems() == parameters.getAnomaliesDetectionMinDataItems()
 					&& isAnomaliesDetectionEnabled() == parameters.isAnomaliesDetectionEnabled();
@@ -162,6 +167,14 @@ public class TpmParameters extends PluginParametersImpl implements ClassifierPar
 
 	public void setSolverTimeout(int solverTimeout) {
 		this.solverTimeout = solverTimeout;
+	}
+	
+	public boolean isTrivialAnalysis() {
+		return isTrivialAnalysis;
+	}
+
+	public void setTrivialAnalysis(boolean isTrivialAnalysis) {
+		this.isTrivialAnalysis = isTrivialAnalysis;
 	}
 	
 	public boolean isFullAnalysisEnabled() {
