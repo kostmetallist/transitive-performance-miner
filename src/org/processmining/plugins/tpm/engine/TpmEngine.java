@@ -1,6 +1,7 @@
 package org.processmining.plugins.tpm.engine;
 
 import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -479,7 +480,7 @@ public class TpmEngine {
 					}				
 				}
 
-			// Intra-cluster analysis
+			// Inter-cluster analysis
 			} else {
 
 				XAttributeLiteral fromAttr = parameters.getFromValue(),

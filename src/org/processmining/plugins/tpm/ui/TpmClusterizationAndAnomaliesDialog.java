@@ -72,7 +72,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 	
 	private JSpinner solverTimeoutSpinner;
 	
-	private JRadioButton intraClusterModeRadio, fullAnalysisModeRadio;
+	private JRadioButton interClusterModeRadio, fullAnalysisModeRadio;
 	private ButtonGroup clusterizationModeButtons;
 	
 	private JCheckBox enableAnomaliesDetectionCheckBox;
@@ -216,10 +216,10 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 
 		clusterizationDetails.setLayout(new GridLayout(3, 2, 6, 2));
 		
-		intraClusterModeRadio = SlickerFactory.instance().createRadioButton("Intra-cluster analysis");
-		intraClusterModeRadio.setBorder(BorderFactory.createEmptyBorder(15, 10, 0, 0));
-		intraClusterModeRadio.setSelected(true);
-		clusterizationDetails.add(intraClusterModeRadio);
+		interClusterModeRadio = SlickerFactory.instance().createRadioButton("Inter-cluster analysis");
+		interClusterModeRadio.setBorder(BorderFactory.createEmptyBorder(15, 10, 0, 0));
+		interClusterModeRadio.setSelected(true);
+		clusterizationDetails.add(interClusterModeRadio);
 		
 		fullAnalysisModeRadio = SlickerFactory.instance().createRadioButton("Full analysis (pairwise dependencies)");
 		fullAnalysisModeRadio.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 10));
@@ -227,7 +227,7 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 		clusterizationDetails.add(fullAnalysisModeRadio);
 		
 		clusterizationModeButtons = new ButtonGroup();
-		clusterizationModeButtons.add(intraClusterModeRadio);
+		clusterizationModeButtons.add(interClusterModeRadio);
 		clusterizationModeButtons.add(fullAnalysisModeRadio);
 		
 		fromGroupingValueLabel = SlickerFactory.instance().createLabel("From value:");
@@ -298,10 +298,10 @@ public class TpmClusterizationAndAnomaliesDialog extends TpmWizardStep {
 			}
 		});
 		
-		intraClusterModeRadio.addActionListener(new ActionListener() {
+		interClusterModeRadio.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (intraClusterModeRadio.isSelected()) {
+				if (interClusterModeRadio.isSelected()) {
 
 					fromGroupingValueTextField.setEditable(true);
 					toGroupingValueTextField.setEditable(true);
