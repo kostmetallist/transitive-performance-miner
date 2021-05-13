@@ -8,7 +8,7 @@ plug-in.
 ## Functionality
 
 <p align="center">
-  <img src="doc/showcase-diagram.png" alt="<icon here>" width="65%"/>
+  <img src="doc/img/showcase-diagram.png" alt="<icon here>" width="65%"/>
 </p>
 
 `TODO` description.
@@ -64,6 +64,11 @@ They are available at public ProM packages
 For developer convenience, they can be checked out with
 
 `svn checkout http://svn.win.tue.nl/repos/prom/Packages/<NAME>/Trunk`
+
+## Versioning
+
+Principles of version assignment are described in
+[Versioning.md](doc/Versioning.md).
 
 ## Troubleshooting
 
