@@ -1,5 +1,6 @@
 package org.processmining.plugins.tpm.model;
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -7,7 +8,7 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.directed.AbstractDirectedGraph;
 import org.processmining.models.graphbased.directed.DirectedGraph;
 import org.processmining.models.graphbased.directed.DirectedGraphNode;
@@ -43,6 +44,7 @@ public class TpmMarkedClusterNet extends AbstractDirectedGraph<TpmMarkedClusterN
 					clusterNameFrom, clusterNameTo));
 			return;
 		}
+
 		addTransition(nodes.get(clusterNameFrom), nodes.get(clusterNameTo), wChar);
 	}
 	
@@ -86,6 +88,38 @@ public class TpmMarkedClusterNet extends AbstractDirectedGraph<TpmMarkedClusterN
 	
 	@SuppressWarnings("rawtypes")
 	public void removeEdge(DirectedGraphEdge edge) {}
+	
+	// TODO correctly setup in/out edges collections
+	public void applyNodeColors() {
+		
+		for (TpmMarkedClusterNetNode node : nodes.values()) {
+			int nodeType = 0;
+			
+//			System.out.println("Node " + node.getLabel() + " inEdgesNum: " + getInEdges(node).size());
+//			System.out.println("Node " + node.getLabel() + " outEdgesNum: " + getOutEdges(node).size());
+
+			if (!getInEdges(node).isEmpty()) {
+				nodeType += 1;
+			} else if (!getOutEdges(node).isEmpty()) {
+				nodeType += 2;
+			}
+
+			switch (nodeType) {
+				// IN
+				case 1:
+					getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(128, 229, 128));
+					break;
+				// OUT
+				case 2:
+					getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(229, 177, 125));
+					break;
+				// INOUT
+				case 3:
+					getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(179, 203, 127));
+					break;
+			}
+		}
+	}
 
 	protected AbstractDirectedGraph<TpmMarkedClusterNetNode, TpmMarkedClusterNetEdge> getEmptyClone() {
 		return new TpmMarkedClusterNet();

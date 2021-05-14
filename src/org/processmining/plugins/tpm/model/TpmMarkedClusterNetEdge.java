@@ -18,6 +18,7 @@ public class TpmMarkedClusterNetEdge extends AbstractDirectedGraphEdge<TpmMarked
 		getAttributeMap().put(AttributeMap.EDGEEND, ArrowType.ARROWTYPE_TECHNICAL);
 		getAttributeMap().put(AttributeMap.SHOWLABEL, true);
 		getAttributeMap().put(AttributeMap.LABEL, wChar.toString());
+		getAttributeMap().put(AttributeMap.LABELALONGEDGE, true);
 	}
 	
 	public TpmClusterNetEdgeWeightCharacteristic getWChar() {

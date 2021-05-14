@@ -497,6 +497,8 @@ public class TpmEngine {
 		}
 
 		LOGGER.info(String.format("Analysis has taken %.3f ms", (System.nanoTime() - startTime) / 1_000_000.0));
+
+		mcn.applyNodeColors();
 		return mcn;
 	}
 }

@@ -15,14 +15,39 @@ public class TpmMarkedClusterNetNode extends AbstractDirectedGraphNode {
 	private TpmMarkedClusterNet graph;
 	
 	public TpmMarkedClusterNetNode(TpmMarkedClusterNet graph, String clusterName) {
+
 		this.graph = graph;
 		getAttributeMap().put(AttributeMap.SHAPE, new RoundedRect());
 		getAttributeMap().put(AttributeMap.SQUAREBB, false);
 		getAttributeMap().put(AttributeMap.RESIZABLE, true);
 		getAttributeMap().put(AttributeMap.SIZE, new Dimension(90, 70));
-		getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(194, 255, 215));
 		getAttributeMap().put(AttributeMap.LABEL, clusterName);
 		getAttributeMap().put(AttributeMap.LABELVERTICALALIGNMENT, SwingConstants.CENTER);
+	}
+	
+	public void autoSetColor() {
+		int nodeType = 0;
+
+		if (!graph.getInEdges(this).isEmpty()) {
+			nodeType += 1;
+		} else if (!graph.getOutEdges(this).isEmpty()) {
+			nodeType += 2;
+		}
+
+		switch (nodeType) {
+			// IN
+			case 1:
+				getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(128, 229, 128));
+				break;
+			// OUT
+			case 2:
+				getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(229, 177, 125));
+				break;
+			// INOUT
+			case 3:
+				getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(179, 203, 127));
+				break;
+		}
 	}
 
 	public AbstractDirectedGraph<?, ?> getGraph() {
