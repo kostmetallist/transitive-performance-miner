@@ -1,6 +1,5 @@
 package org.processmining.plugins.tpm.model;
 
-import java.awt.Color;
 import java.awt.Dimension;
 
 import javax.swing.SwingConstants;
@@ -23,31 +22,6 @@ public class TpmMarkedClusterNetNode extends AbstractDirectedGraphNode {
 		getAttributeMap().put(AttributeMap.SIZE, new Dimension(90, 70));
 		getAttributeMap().put(AttributeMap.LABEL, clusterName);
 		getAttributeMap().put(AttributeMap.LABELVERTICALALIGNMENT, SwingConstants.CENTER);
-	}
-	
-	public void autoSetColor() {
-		int nodeType = 0;
-
-		if (!graph.getInEdges(this).isEmpty()) {
-			nodeType += 1;
-		} else if (!graph.getOutEdges(this).isEmpty()) {
-			nodeType += 2;
-		}
-
-		switch (nodeType) {
-			// IN
-			case 1:
-				getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(128, 229, 128));
-				break;
-			// OUT
-			case 2:
-				getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(229, 177, 125));
-				break;
-			// INOUT
-			case 3:
-				getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(179, 203, 127));
-				break;
-		}
 	}
 
 	public AbstractDirectedGraph<?, ?> getGraph() {

@@ -22,6 +22,9 @@ public class TpmMarkedClusterNet extends AbstractDirectedGraph<TpmMarkedClusterN
 	private Map<String, TpmMarkedClusterNetNode> nodes;
 	private Map<TpmMarkedClusterNetNode, Set<TpmMarkedClusterNetEdge>> edges;
 	private Map<TpmMarkedClusterNetEdge, TpmClusterNetEdgeWeightCharacteristic> weights;
+	
+	private Set<TpmMarkedClusterNetNode> sources = new HashSet<>(),
+			targets = new HashSet<>();
 
 	public TpmMarkedClusterNet() {
 		this.nodes = new HashMap<>();
@@ -34,7 +37,11 @@ public class TpmMarkedClusterNet extends AbstractDirectedGraph<TpmMarkedClusterN
 		if (nodes.keySet().stream().anyMatch(x -> x.equals(clusterName))) {
 			return;
 		}
-		nodes.put(clusterName, new TpmMarkedClusterNetNode(this, clusterName));
+
+		TpmMarkedClusterNetNode node = new TpmMarkedClusterNetNode(this, clusterName);
+
+		graphElementAdded(node);
+		nodes.put(clusterName, node);
 	}
 	
 	public void addTransition(String clusterNameFrom, String clusterNameTo, TpmClusterNetEdgeWeightCharacteristic wChar) {
@@ -58,11 +65,15 @@ public class TpmMarkedClusterNet extends AbstractDirectedGraph<TpmMarkedClusterN
 
 			} else {
 				outgoing.add(new TpmMarkedClusterNetEdge(clusterNetNodeFrom, clusterNetNodeTo, wChar));
+				targets.add(clusterNetNodeTo);
 			}
 
 		} else {
 			Set<TpmMarkedClusterNetEdge> outgoing = new HashSet<>();
 			outgoing.add(new TpmMarkedClusterNetEdge(clusterNetNodeFrom, clusterNetNodeTo, wChar));
+
+			sources.add(clusterNetNodeFrom);
+			targets.add(clusterNetNodeTo);
 			edges.put(clusterNetNodeFrom, outgoing);
 		}
 	}
@@ -88,34 +99,32 @@ public class TpmMarkedClusterNet extends AbstractDirectedGraph<TpmMarkedClusterN
 	
 	@SuppressWarnings("rawtypes")
 	public void removeEdge(DirectedGraphEdge edge) {}
-	
-	// TODO correctly setup in/out edges collections
+
 	public void applyNodeColors() {
 		
 		for (TpmMarkedClusterNetNode node : nodes.values()) {
 			int nodeType = 0;
-			
-//			System.out.println("Node " + node.getLabel() + " inEdgesNum: " + getInEdges(node).size());
-//			System.out.println("Node " + node.getLabel() + " outEdgesNum: " + getOutEdges(node).size());
 
-			if (!getInEdges(node).isEmpty()) {
+			if (sources.contains(node)) {
 				nodeType += 1;
-			} else if (!getOutEdges(node).isEmpty()) {
+			}
+			
+			if (targets.contains(node)) {
 				nodeType += 2;
 			}
 
 			switch (nodeType) {
 				// IN
 				case 1:
-					getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(128, 229, 128));
+					node.getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(128, 229, 128));
 					break;
 				// OUT
 				case 2:
-					getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(229, 177, 125));
+					node.getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(229, 177, 125));
 					break;
 				// INOUT
 				case 3:
-					getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(179, 203, 127));
+					node.getAttributeMap().put(AttributeMap.FILLCOLOR, new Color(179, 203, 127));
 					break;
 			}
 		}
