@@ -1,7 +1,7 @@
 # Transitive Performance Miner
 
 A tool for deriving process performance knowledge by event log analysis.
-Implementation is in form of
+The implementation is in the form of
 [ProM 6 Framework](https://www.promtools.org/doku.php?id=gettingstarted:start)
 plug-in.
 
@@ -11,7 +11,25 @@ plug-in.
   <img src="doc/img/showcase-diagram.png" alt="<icon here>" width="65%"/>
 </p>
 
-`TODO` description.
+Given an event log in [XES](https://xes-standard.org/) format, the plug-in
+provides an interface to import contents of the log and apply performance
+analysis for the process "snapshot". Assuming actions throughout the business
+process lifetime were registered and then collected, process mining techniques
+can be utilized to gather useful info based on events occurred during the
+process run. Performance assessments are represented by building a marked
+cluster net (MCN), which essentially is a directed graph with performance
+evaluations as weights of edges.
+
+The plug-in provides a set of parameters to customize analysis:
+
+  - clasterization attribute (by selecting an event attribute to forward to classifier)
+  - full/inter-cluster mode switch
+  - source/target value of the clasterization attribute
+  - evaluation metric attribute
+  - ILP solver timeout
+  - case anomaly filtering mode switch
+
+Results of the work take the form of visualized MCN on an interactive panel.
 
 ## Prerequisites
 
